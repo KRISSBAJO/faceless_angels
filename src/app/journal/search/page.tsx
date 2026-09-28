@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import {
   ArticleList,
   Pager,
@@ -23,6 +24,8 @@ export default async function SearchPage({
   const tag = one(params.tag);
   const author = one(params.author);
   const page = Number(one(params.page)) || 1;
+  // With nothing to search for, the full list lives on its own page.
+  if (!q && !tag && !author) redirect("/journal/articles");
 
   const query = new URLSearchParams();
   if (q) query.set("q", q);

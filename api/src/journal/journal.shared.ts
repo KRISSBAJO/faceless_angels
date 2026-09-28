@@ -29,6 +29,7 @@ const RESERVED = [
   'series',
   'unsubscribe',
   'article',
+  'articles',
 ];
 
 /**

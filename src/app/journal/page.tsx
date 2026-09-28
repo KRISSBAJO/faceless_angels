@@ -50,12 +50,20 @@ export default async function JournalPage() {
         </div>
         <div className="flex flex-col items-start gap-3">
           <SearchBox />
-          <a
-            href="/journal/feed.xml"
-            className="text-sm text-muted underline underline-offset-4 hover:text-ink"
-          >
-            Follow in a feed reader
-          </a>
+          <p className="flex flex-wrap gap-x-5 gap-y-1 text-sm">
+            <Link
+              href="/journal/articles"
+              className="font-medium underline underline-offset-4"
+            >
+              All articles
+            </Link>
+            <a
+              href="/journal/feed.xml"
+              className="text-muted underline underline-offset-4 hover:text-ink"
+            >
+              Follow in a feed reader
+            </a>
+          </p>
         </div>
       </div>
 
@@ -176,7 +184,7 @@ export default async function JournalPage() {
               <ArticleList articles={latest} empty="" />
               <p className="pt-2 text-sm">
                 <Link
-                  href="/journal/search"
+                  href="/journal/articles"
                   className="underline underline-offset-4"
                 >
                   See every article

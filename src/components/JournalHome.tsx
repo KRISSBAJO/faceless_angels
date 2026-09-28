@@ -57,9 +57,15 @@ export default async function JournalHome() {
             {home.featured.author.name} ·{" "}
             {minutes(home.featured.readingMinutes)}
           </p>
-          <div className="pt-1">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-3 pt-1">
             <Link href="/journal" className="btn btn-primary">
               Read the Journal
+            </Link>
+            <Link
+              href="/journal/articles"
+              className="font-medium underline underline-offset-4"
+            >
+              See all articles
             </Link>
           </div>
         </div>

@@ -92,6 +92,59 @@ export function ArticleRow({ article }: { article: ArticleCard }) {
   );
 }
 
+/** An article as a card in a grid, with its cover on top. */
+export function ArticleTile({ article }: { article: ArticleCard }) {
+  return (
+    <article className="group flex h-full flex-col gap-3">
+      <Link href={`/journal/${article.slug}`} tabIndex={-1} aria-hidden>
+        {article.cover ? (
+          // Covers are served by our own API, so the plain element is right.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={mediaUrl(article.cover.id)}
+            alt=""
+            loading="lazy"
+            className="aspect-[16/10] w-full rounded-xl object-cover"
+          />
+        ) : (
+          // Without a cover, the subject stands in for a picture.
+          <div className="flex aspect-[16/10] w-full flex-col justify-between rounded-xl border border-line bg-surface p-5 transition-colors group-hover:border-gold-bright">
+            <span
+              aria-hidden
+              className="font-serif text-5xl leading-none text-gold-bright/60"
+            >
+              “
+            </span>
+            <span className="flex flex-col gap-2">
+              <span className="h-px w-10 bg-gold-bright" />
+              <span className="font-serif text-xl italic leading-tight text-gold">
+                {article.category.label}
+              </span>
+            </span>
+          </div>
+        )}
+      </Link>
+      <Kicker article={article} />
+      <h3 className="font-serif text-2xl leading-snug">
+        <Link
+          href={`/journal/${article.slug}`}
+          className="underline-offset-4 group-hover:underline"
+        >
+          {article.title}
+        </Link>
+      </h3>
+      {article.summary ? (
+        <p className="line-clamp-3 text-sm leading-6 text-muted">
+          {article.summary}
+        </p>
+      ) : null}
+      <div className="mt-auto">
+        <Byline article={article} />
+      </div>
+    </article>
+  );
+}
+
 export function ArticleList({
   articles,
   empty,
