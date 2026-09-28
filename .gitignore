@@ -40,3 +40,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local-only Docker settings and certificates (see docker-compose.override.yml)
+docker-compose.override.yml
+/.certs/

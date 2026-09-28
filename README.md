@@ -38,6 +38,12 @@ server.
 Database changes are plain SQL files in `api/migrations`. The API applies new
 ones when it starts.
 
+If calls from the API container to Patvero or RelyKit fail with "unable to
+verify the first certificate", antivirus on the computer (Norton, for one) is
+re-signing secure connections. Export its root certificate to
+`.certs/local-root.pem` and trust it in a `docker-compose.override.yml` with
+`NODE_EXTRA_CA_CERTS`. Both are git-ignored and only matter on that computer.
+
 ## The first administrator
 
 Set `SEED_OWNER_EMAIL` and `SEED_OWNER_PASSWORD` in `.env`. The API creates
