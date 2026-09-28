@@ -143,3 +143,7 @@ h3 {
   background: var(--ink);
   vertical-align: -0.05em;
 }
+
+.redacted.on-night {
+  background: var(--night-muted);
+}

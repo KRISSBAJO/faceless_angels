@@ -22,7 +22,7 @@ const data = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: "Faceless Angels",
   description:
-    "A Christian community connecting people with documented needs to people willing to help, without seeking recognition.",
+    "A Christian network of prayer groups, and a way to meet real needs without seeking recognition.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

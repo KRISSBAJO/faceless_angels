@@ -52,7 +52,18 @@ export class PrayerPublicController {
   constructor(
     private readonly requests: PrayerRequestsService,
     private readonly sessions: PrayerSessionsService,
+    private readonly groups: PrayerGroupsService,
   ) {}
+
+  /** For the home page. */
+  @Get('overview')
+  async overview() {
+    const [groups, testimonies] = await Promise.all([
+      this.groups.publicList(),
+      this.requests.testimonies(),
+    ]);
+    return { ...groups, testimonies: testimonies.slice(0, 3) };
+  }
 
   @Get('testimonies')
   testimonies() {

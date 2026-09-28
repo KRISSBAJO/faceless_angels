@@ -2,11 +2,12 @@ import Link from "next/link";
 import CaseViews from "@/components/CaseViews";
 import Mark from "@/components/Mark";
 import OpenNeeds from "@/components/OpenNeeds";
+import PrayerHome from "@/components/PrayerHome";
 
 const nav = [
-  { href: "/needs", label: "Needs" },
   { href: "/prayer", label: "Prayer" },
-  { href: "#how", label: "How it works" },
+  { href: "/needs", label: "Needs" },
+  { href: "#how", label: "How giving works" },
   { href: "#safeguards", label: "Safeguards" },
   { href: "#privacy", label: "Privacy" },
   { href: "#community", label: "Community" },
@@ -87,12 +88,20 @@ const levels = [
 
 const areas = [
   {
+    name: "Prayer Groups",
+    body: "A network of groups that pray each week, online and in person, led by named leaders.",
+  },
+  {
+    name: "Prayer Requests",
+    body: "Ask for prayer in private, in your group, or across the network. Prayer is always optional.",
+  },
+  {
     name: "Ask for Help",
     body: "Food, rent, utilities, transportation, school supplies, and emergencies.",
   },
   {
     name: "Be an Angel",
-    body: "Browse verified needs and cover one without your name attached.",
+    body: "Browse approved needs and pledge toward one without your name attached.",
   },
   {
     name: "Nominate Someone",
@@ -101,10 +110,6 @@ const areas = [
   {
     name: "Angel Missions",
     body: "Churches and groups organize help around a specific need.",
-  },
-  {
-    name: "Prayer",
-    body: "Ask for prayer, join a prayer group, and pray live together. Prayer is always optional.",
   },
   {
     name: "Journal",
@@ -158,37 +163,68 @@ export default function Home() {
         {/* Hero */}
         <section className="mx-auto grid w-full max-w-6xl items-center gap-12 px-5 py-16 lg:grid-cols-[1.1fr_1fr] lg:py-24">
           <div className="flex flex-col gap-7">
-            <Eyebrow>A Christian community of quiet giving</Eyebrow>
+            <Eyebrow>A Christian community of prayer and quiet giving</Eyebrow>
             <h1 className="font-serif text-5xl leading-[1.02] tracking-tight sm:text-7xl">
+              Pray together.
+              <br />
               Help quietly.
               <br />
               <em className="text-gold">Love openly.</em>
             </h1>
             <p className="max-w-[34rem] text-lg leading-8 text-muted">
-              Faceless Angels connects people with documented needs to people
-              willing to help, without seeking recognition. The person you
-              help never learns your name. Every gift is still recorded,
-              checked, and accounted for.
+              Faceless Angels is a network of prayer groups, and a way to meet
+              real needs without seeking recognition. Pray with a group each
+              week. Help someone who never learns your name.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link
-                href="/needs"
+                href="/prayer"
                 className="rounded-full bg-ink px-6 py-3 font-medium text-paper transition-opacity hover:opacity-90"
               >
-                Become an Angel
+                Pray with us
               </Link>
               <Link
-                href="/ask"
+                href="/needs"
                 className="rounded-full border border-ink px-6 py-3 font-medium transition-colors hover:bg-ink hover:text-paper"
               >
-                Ask for help
+                Become an Angel
               </Link>
             </div>
           </div>
 
+          <div className="flex flex-col gap-5">
+          <article
+            aria-label="Example prayer request"
+            className="flex flex-col gap-4 rounded-2xl bg-night p-6 text-night-ink shadow-[0_24px_60px_-30px_rgba(20,33,61,0.5)] sm:p-8 lg:-ml-8 lg:mr-8"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="font-mono text-xs uppercase tracking-[0.1em] text-night-muted">
+                Prayer request · Midweek group
+              </p>
+              <span className="rounded-full bg-gold-bright px-2.5 py-1 text-xs font-medium text-night">
+                Example request
+              </span>
+            </div>
+            <p className="font-serif text-2xl leading-snug">
+              Please pray for my mother. She goes into surgery on Monday.
+            </p>
+            <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
+              <span className="text-night-muted">
+                From{" "}
+                <span
+                  className="redacted on-night w-20"
+                  aria-label="name hidden"
+                />
+              </span>
+              <span className="rounded-full border border-night-line px-3 py-1 font-medium">
+                ✓ You prayed
+              </span>
+            </div>
+          </article>
+
           <article
             aria-label="Example help request"
-            className="flex flex-col gap-5 rounded-2xl border border-line bg-surface p-6 shadow-[0_24px_60px_-30px_rgba(20,33,61,0.35)] sm:p-8"
+            className="flex flex-col gap-5 rounded-2xl border border-line bg-surface p-6 shadow-[0_24px_60px_-30px_rgba(20,33,61,0.35)] sm:p-8 lg:ml-8"
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="font-mono text-xs uppercase tracking-[0.1em] text-muted">
@@ -241,7 +277,10 @@ export default function Home() {
               Paid directly to the utility provider. Due Friday.
             </p>
           </article>
+          </div>
         </section>
+
+        <PrayerHome />
 
         <OpenNeeds />
 
@@ -264,7 +303,7 @@ export default function Home() {
           className="mx-auto flex w-full max-w-6xl scroll-mt-8 flex-col gap-10 px-5 py-20"
         >
           <div className="flex max-w-2xl flex-col gap-4">
-            <Eyebrow>How it works</Eyebrow>
+            <Eyebrow>How giving works</Eyebrow>
             <h2 className="font-serif text-4xl leading-tight sm:text-5xl">
               From a private request to a paid bill
             </h2>
@@ -452,7 +491,22 @@ export default function Home() {
 
         {/* Closing */}
         <section id="start" className="scroll-mt-8 bg-night text-night-ink">
-          <div className="mx-auto grid w-full max-w-6xl gap-6 px-5 py-20 md:grid-cols-2">
+          <div className="mx-auto grid w-full max-w-6xl gap-6 px-5 py-20 lg:grid-cols-3">
+            <div className="flex flex-col items-start gap-4 rounded-2xl border border-night-line p-7 sm:p-10">
+              <h2 className="font-serif text-3xl sm:text-4xl">
+                Pray with a group
+              </h2>
+              <p className="leading-7 text-night-muted">
+                Find a group that prays each week, or start one for your
+                church, your street, or your family.
+              </p>
+              <Link
+                href="/prayer"
+                className="mt-auto rounded-full bg-gold-bright px-6 py-3 font-medium text-night transition-opacity hover:opacity-90"
+              >
+                Pray with us
+              </Link>
+            </div>
             <div className="flex flex-col items-start gap-4 rounded-2xl border border-night-line p-7 sm:p-10">
               <h2 className="font-serif text-3xl sm:text-4xl">
                 Become someone&apos;s Angel
@@ -463,7 +517,7 @@ export default function Home() {
               </p>
               <Link
                 href="/needs"
-                className="mt-2 rounded-full bg-gold-bright px-6 py-3 font-medium text-night transition-opacity hover:opacity-90"
+                className="mt-auto rounded-full border border-night-ink px-6 py-3 font-medium transition-colors hover:bg-night-ink hover:text-night"
               >
                 See open needs
               </Link>
@@ -478,7 +532,7 @@ export default function Home() {
               </p>
               <Link
                 href="/ask"
-                className="mt-2 rounded-full border border-night-ink px-6 py-3 font-medium transition-colors hover:bg-night-ink hover:text-night"
+                className="mt-auto rounded-full border border-night-ink px-6 py-3 font-medium transition-colors hover:bg-night-ink hover:text-night"
               >
                 Ask for help
               </Link>
@@ -493,7 +547,7 @@ export default function Home() {
             <Mark />
             <span className="font-serif text-lg">Faceless Angels</span>
           </div>
-          <p>Help quietly. Love openly.</p>
+          <p>Pray together. Help quietly. Love openly.</p>
           <p className="basis-full">
             Faceless Angels is not an emergency service. If you are in
             immediate danger, call 911.

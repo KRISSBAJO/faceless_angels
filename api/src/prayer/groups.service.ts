@@ -150,6 +150,41 @@ export class PrayerGroupsService {
     };
   }
 
+  /**
+   * What a visitor may see before they sign in: that groups exist and what
+   * they are about. No leaders, members, or links.
+   */
+  async publicList() {
+    const found = await this.db.query<{
+      name: string;
+      theme: string | null;
+      language: string;
+      city: string | null;
+      region: string | null;
+      meets_online: boolean;
+      schedule: string | null;
+      total: number;
+    }>(
+      `select name, theme, language, city, region, meets_online, schedule,
+              count(*) over ()::int as total
+       from prayer_groups
+       where status = 'active' and access in ('open', 'apply')
+       order by created_at desc limit 6`,
+    );
+    return {
+      total: found.rows[0]?.total ?? 0,
+      groups: found.rows.map((g) => ({
+        name: g.name,
+        theme: g.theme,
+        language: g.language,
+        city: g.city,
+        region: g.region,
+        meetsOnline: g.meets_online,
+        schedule: g.schedule,
+      })),
+    };
+  }
+
   /** Groups I belong to, lead, applied to, was invited to, or proposed. */
   async mine(viewer: SessionUser) {
     const found = await this.db.query<GroupRow>(
