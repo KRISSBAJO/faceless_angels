@@ -60,7 +60,7 @@ export interface ArticleList {
 
 export interface Article extends Omit<ArticleCard, "author"> {
   body: string;
-  scripture: { ref: string; text?: string }[];
+  scripture: { ref: string; text?: string; translation?: "kjv" | "web" }[];
   reflection: string[];
   action: string;
   allowComments: boolean;
@@ -118,7 +118,7 @@ export interface StudioArticle {
   category: { key: string; label: string };
   tags: string[];
   cover: { id: string; alt: string } | null;
-  scripture: { ref: string; text?: string }[];
+  scripture: { ref: string; text?: string; translation?: "kjv" | "web" }[];
   reflection: string[];
   action: string;
   seriesId: string | null;

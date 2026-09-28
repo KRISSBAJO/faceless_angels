@@ -64,6 +64,11 @@ Staff cannot sign themselves up. An administrator invites them from
   private notes, with email when a followed category has something new
 - The Studio: a writing editor with review by a second person, scheduling,
   versions, corrections, and numbers for each article
+- Word import: a .docx file becomes a draft in the editor, with its headings,
+  lists, quotes, tables, and pictures, for the writer to check before saving
+- Scripture lookup: type a reference and the exact words are filled in from
+  the King James Version or the World English Bible, both public domain and
+  held in `api/data/bible`. No AI is used for scripture.
 - Admin: people, invitations, need types and limits, agreement wording, audit log
 
 ## What is not built

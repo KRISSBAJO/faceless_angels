@@ -28,8 +28,28 @@ export class ScriptureDto {
 
   @IsOptional()
   @IsString()
-  @MaxLength(2000)
+  @MaxLength(6000)
   text?: string;
+
+  @IsOptional()
+  @IsIn(['kjv', 'web'])
+  translation?: 'kjv' | 'web';
+}
+
+export class ScriptureLookupDto {
+  @IsString()
+  @Length(3, 80, { message: 'Enter the reference, like John 3:16.' })
+  ref: string;
+
+  @IsOptional()
+  @IsIn(['kjv', 'web'], { message: 'Choose KJV or WEB.' })
+  translation?: 'kjv' | 'web';
+}
+
+export class FindScriptureDto {
+  @IsString()
+  @MaxLength(60_000)
+  text: string;
 }
 
 export class ArticleDto {

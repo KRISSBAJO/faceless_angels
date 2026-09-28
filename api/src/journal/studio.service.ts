@@ -1037,6 +1037,7 @@ export class JournalStudioService implements OnModuleInit, OnModuleDestroy {
         (dto.scripture ?? []).map((s) => ({
           ref: s.ref.trim(),
           text: s.text?.trim() || undefined,
+          translation: s.text?.trim() ? s.translation : undefined,
         })),
       ),
       (dto.reflection ?? []).map((q) => q.trim()),

@@ -20,6 +20,8 @@ import {
 import { Field, FormError } from "../Field";
 import ShareBar from "../ShareBar";
 import BodyEditor from "./BodyEditor";
+import ScripturePanel, { type Passage } from "./ScripturePanel";
+import WordImport, { type Imported } from "./WordImport";
 
 interface Draft {
   title: string;
@@ -30,7 +32,7 @@ interface Draft {
   tags: string;
   coverMediaId: string | null;
   coverAlt: string;
-  scripture: { ref: string; text: string }[];
+  scripture: Passage[];
   reflection: string[];
   action: string;
   seriesId: string;
@@ -65,7 +67,11 @@ function fromArticle(article: StudioArticleDetail): Draft {
     tags: article.tags.join(", "),
     coverMediaId: article.cover?.id ?? null,
     coverAlt: article.cover?.alt ?? "",
-    scripture: article.scripture.map((s) => ({ ref: s.ref, text: s.text ?? "" })),
+    scripture: article.scripture.map((s) => ({
+      ref: s.ref,
+      text: s.text ?? "",
+      translation: s.translation ?? "kjv",
+    })),
     reflection: article.reflection,
     action: article.action,
     seriesId: article.seriesId ?? "",
@@ -89,7 +95,11 @@ function toBody(draft: Draft, note: string) {
     coverAlt: draft.coverAlt.trim() || undefined,
     scripture: draft.scripture
       .filter((s) => s.ref.trim())
-      .map((s) => ({ ref: s.ref.trim(), text: s.text.trim() || undefined })),
+      .map((s) => ({
+        ref: s.ref.trim(),
+        text: s.text.trim() || undefined,
+        translation: s.translation,
+      })),
     reflection: draft.reflection.map((q) => q.trim()).filter(Boolean),
     action: draft.action,
     seriesId: draft.seriesId || null,
@@ -233,6 +243,9 @@ export default function ArticleEditor({
     at: string;
   } | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [imported, setImported] = useState<{ file: string; notes: string[] } | null>(
+    null,
+  );
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [missing, setMissing] = useState(false);
@@ -510,6 +523,62 @@ export default function ArticleEditor({
 
       <div className="grid gap-10 xl:grid-cols-[1fr_20rem]">
         <div className="flex min-w-0 flex-col gap-6">
+          {canEdit && !live ? (
+            <WordImport
+              replacing={Boolean(draft.title.trim() || draft.body.trim())}
+              onImported={(result: Imported, file) => {
+                setDraft((old) => {
+                  const have = new Set(
+                    old.scripture.map((p) => p.ref.trim().toLowerCase()),
+                  );
+                  return {
+                    ...old,
+                    title: result.title || old.title,
+                    summary: result.summary || old.summary,
+                    body: result.body,
+                    scripture: [
+                      ...old.scripture,
+                      ...result.scripture.filter(
+                        (p) => !have.has(p.ref.toLowerCase()),
+                      ),
+                    ].slice(0, 12),
+                  };
+                });
+                setImported({ file, notes: result.notes });
+                setNotice(null);
+                setError(null);
+              }}
+            />
+          ) : null}
+
+          {imported ? (
+            <div
+              role="status"
+              className="flex flex-col gap-2 rounded-xl border border-gold-bright bg-gold-soft p-4 text-sm leading-6"
+            >
+              <p className="font-medium">
+                “{imported.file}” is in the editor. Nothing is saved yet.
+              </p>
+              <ul className="flex list-disc flex-col gap-1 pl-5">
+                <li>Read it through and change anything you like.</li>
+                {imported.notes.map((note) => (
+                  <li key={note}>{note}</li>
+                ))}
+                <li>
+                  When it looks right, press Save. Then send it for review as
+                  usual.
+                </li>
+              </ul>
+              <button
+                type="button"
+                className="self-start underline underline-offset-4"
+                onClick={() => setImported(null)}
+              >
+                Close
+              </button>
+            </div>
+          ) : null}
+
           <Field id="title" label="Title">
             <input
               id="title"
@@ -543,78 +612,12 @@ export default function ArticleEditor({
           />
 
           <Panel title="Scripture">
-            <p className="text-sm text-muted">
-              Shown in a box above the article. A teaching or devotional needs
-              at least one. Type the words from the King James Version.
-            </p>
-            {draft.scripture.map((passage, i) => (
-              <div
-                key={i}
-                className="grid gap-3 rounded-xl border border-line p-4 sm:grid-cols-[12rem_1fr_auto]"
-              >
-                <input
-                  id={`scripture-ref-${i}`}
-                  aria-label="Reference"
-                  className="input"
-                  placeholder="Matthew 6:3-4"
-                  value={passage.ref}
-                  disabled={!canEdit}
-                  maxLength={80}
-                  onChange={(event) =>
-                    set(
-                      "scripture",
-                      draft.scripture.map((s, n) =>
-                        n === i ? { ...s, ref: event.target.value } : s,
-                      ),
-                    )
-                  }
-                />
-                <textarea
-                  id={`scripture-text-${i}`}
-                  aria-label="The words of the passage"
-                  className="input"
-                  rows={2}
-                  placeholder="The words of the passage (optional)"
-                  value={passage.text}
-                  disabled={!canEdit}
-                  maxLength={2000}
-                  onChange={(event) =>
-                    set(
-                      "scripture",
-                      draft.scripture.map((s, n) =>
-                        n === i ? { ...s, text: event.target.value } : s,
-                      ),
-                    )
-                  }
-                />
-                <button
-                  type="button"
-                  className="self-start text-sm text-muted underline underline-offset-4"
-                  disabled={!canEdit}
-                  onClick={() =>
-                    set(
-                      "scripture",
-                      draft.scripture.filter((_, n) => n !== i),
-                    )
-                  }
-                >
-                  Remove
-                </button>
-              </div>
-            ))}
-            {canEdit && draft.scripture.length < 12 ? (
-              <div>
-                <button
-                  type="button"
-                  className="btn btn-ghost px-4 py-2 text-sm"
-                  onClick={() =>
-                    set("scripture", [...draft.scripture, { ref: "", text: "" }])
-                  }
-                >
-                  Add a passage
-                </button>
-              </div>
-            ) : null}
+            <ScripturePanel
+              passages={draft.scripture}
+              body={draft.body}
+              disabled={!canEdit}
+              onChange={(passages) => set("scripture", passages)}
+            />
           </Panel>
 
           <Panel title="Questions to think about">

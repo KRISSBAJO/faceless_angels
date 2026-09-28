@@ -253,7 +253,9 @@ export default async function ArticlePage({
                   }
                 >
                   {passage.ref}
-                  {passage.text ? " (KJV)" : ""}
+                  {passage.text && passage.translation
+                    ? ` (${passage.translation.toUpperCase()})`
+                    : ""}
                 </figcaption>
               </figure>
             ))}

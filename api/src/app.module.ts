@@ -22,6 +22,8 @@ import {
 } from './journal/journal.controller';
 import { JournalReaderService } from './journal/reader.service';
 import { JournalStudioService } from './journal/studio.service';
+import { WordImportService } from './journal/word-import.service';
+import { BibleService } from './bible/bible.service';
 import { MailService } from './mail/mail.service';
 import { NeedsController } from './needs/needs.controller';
 import { NeedsService } from './needs/needs.service';
@@ -89,6 +91,8 @@ class HealthController {
     PrayerModerationService,
     JournalReaderService,
     JournalStudioService,
+    WordImportService,
+    BibleService,
     AdminService,
     SeedService,
     { provide: APP_GUARD, useClass: ThrottlerGuard },

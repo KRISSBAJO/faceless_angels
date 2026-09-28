@@ -16,10 +16,14 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "cookie-parser": "^1.4.7",
+    "jszip": "^3.10.2",
+    "mammoth": "^1.13.0",
     "nodemailer": "^10.0.11",
     "pg": "^8.13.0",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "turndown": "^7.2.4",
+    "turndown-plugin-gfm": "^1.0.2"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.7",
@@ -28,6 +32,7 @@
     "@types/node": "^22.0.0",
     "@types/nodemailer": "^8.0.2",
     "@types/pg": "^8.11.0",
+    "@types/turndown": "^5.0.6",
     "typescript": "^5.6.0"
   }
 }

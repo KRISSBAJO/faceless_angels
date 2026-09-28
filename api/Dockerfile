@@ -13,6 +13,7 @@ COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY package.json ./
 COPY migrations ./migrations
+COPY data ./data
 RUN mkdir -p /data/evidence && chown -R node:node /data
 USER node
 EXPOSE 4010

@@ -35,17 +35,21 @@ import {
   CommentModerateDto,
   CommentReportDto,
   CorrectionDto,
+  FindScriptureDto,
   FeatureDto,
   NoteDto,
   PublishDto,
   ReactionDto,
   ReviewDto,
+  ScriptureLookupDto,
   SeriesDto,
   ShareDto,
   TokenDto,
 } from './journal.dto';
 import { JournalReaderService } from './reader.service';
 import { JournalStudioService } from './studio.service';
+import { WordImportService } from './word-import.service';
+import { BibleService } from '../bible/bible.service';
 
 const WRITES = { default: { ttl: 60_000, limit: 30 } };
 const Id = (name = 'id') => Param(name, ParseUUIDPipe);
@@ -251,7 +255,38 @@ export class JournalMemberController {
 @UseGuards(AuthGuard)
 @Roles(...JOURNAL_STAFF_ROLES)
 export class JournalStudioController {
-  constructor(private readonly studio: JournalStudioService) {}
+  constructor(
+    private readonly studio: JournalStudioService,
+    private readonly word: WordImportService,
+    private readonly bible: BibleService,
+  ) {}
+
+  /** Reads a Word file into a draft for the editor. Nothing is published. */
+  @Post('import')
+  @HttpCode(200)
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
+  @UseInterceptors(
+    FileInterceptor('file', { limits: { fileSize: 20 * 1024 * 1024, files: 1 } }),
+  )
+  importWord(
+    @CurrentUser() viewer: SessionUser,
+    @UploadedFile() file: Express.Multer.File | undefined,
+  ) {
+    return this.word.fromWord(viewer, file);
+  }
+
+  /** The exact words of a passage, from the public-domain text we hold. */
+  @Get('scripture')
+  scripture(@Query() dto: ScriptureLookupDto) {
+    return this.bible.passage(dto.ref, dto.translation ?? 'kjv');
+  }
+
+  /** Bible references written in a piece of text. */
+  @Post('scripture/find')
+  @HttpCode(200)
+  findScripture(@Body() dto: FindScriptureDto) {
+    return this.bible.find(dto.text);
+  }
 
   @Get('desk')
   desk(@CurrentUser() viewer: SessionUser) {
