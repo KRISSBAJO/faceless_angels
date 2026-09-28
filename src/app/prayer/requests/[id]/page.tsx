@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import AppShell from "@/components/AppShell";
 import { Field, FormError } from "@/components/Field";
 import { PrayedButton } from "@/components/PrayerCard";
+import ReportForm from "@/components/ReportForm";
 import { api, errorMessage } from "@/lib/api";
 import { formatMoment } from "@/lib/format";
 import {
@@ -115,7 +116,7 @@ export default function PrayerRequestPage() {
               }`
             : ""}
           {request.needsCare ? " · May need care" : ""}
-          {request.forwarded ? " · Passed on by a group leader" : ""}
+          {request.forwarded ? " · Passed on by a group admin" : ""}
         </p>
         <h1 className="whitespace-pre-wrap break-words font-serif text-3xl leading-snug sm:text-4xl">
           {request.body}
@@ -298,7 +299,7 @@ export default function PrayerRequestPage() {
                     ["showName", "Show my first name and last initial", request.showName],
                     ["allowResponses", "Let people write encouragement", request.allowResponses],
                     ["allowFollow", "Let people follow this request", request.allowFollow],
-                    ["allowForward", "Let a group leader pass this to the prayer team", request.allowForward],
+                    ["allowForward", "Let a group admin pass this to the prayer team", request.allowForward],
                   ] as const
                 ).map(([name, label, on]) => (
                   <label key={name} className="flex items-center gap-2">
@@ -403,46 +404,30 @@ export default function PrayerRequestPage() {
         ) : null}
 
         {panel === "report" ? (
-          <form
-            onSubmit={(event) => {
-              const reason = text(event, "reason");
-              void run(
-                () =>
-                  api(
-                    reportOn
-                      ? `/prayer/responses/${reportOn}/report`
-                      : `${base}/report`,
-                    { body: { reason } },
-                  ),
-                "Thank you. Someone will look at it.",
-              );
+          <ReportForm
+            key={reportOn ?? "request"}
+            path={
+              reportOn
+                ? `/prayer/responses/${reportOn}/report`
+                : `${base}/report`
+            }
+            question={
+              reportOn
+                ? "What is wrong with this reply?"
+                : "What is wrong with this request?"
+            }
+            goesTo={
+              request.groupId
+                ? "The admins of this group and the site moderators can see this report. The person you report is not told who sent it."
+                : "A site moderator will look at it. The person you report is not told who sent it."
+            }
+            onSent={() => {
+              setPanel(null);
+              setReportOn(null);
+              setNotice("Thank you. Someone will look at it.");
             }}
-            className="flex flex-col gap-4 rounded-xl border border-line bg-surface p-5"
-          >
-            <Field
-              id="reason"
-              label={reportOn ? "What is wrong with this reply?" : "What is wrong with this request?"}
-              hint={
-                request.groupId
-                  ? "The leaders of this group will look at it."
-                  : "A moderator will look at it."
-              }
-            >
-              <input
-                id="reason"
-                name="reason"
-                className="input"
-                required
-                minLength={5}
-                maxLength={500}
-              />
-            </Field>
-            <div>
-              <button type="submit" className="btn btn-primary" disabled={busy}>
-                Send report
-              </button>
-            </div>
-          </form>
+            onCancel={() => setPanel(null)}
+          />
         ) : null}
 
         {panel === "block" ? (

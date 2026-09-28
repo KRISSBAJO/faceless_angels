@@ -7,6 +7,7 @@ import AppShell from "@/components/AppShell";
 import { Field, FormError } from "@/components/Field";
 import GroupForm, { type GroupValues } from "@/components/GroupForm";
 import PrayerCard from "@/components/PrayerCard";
+import ReportForm from "@/components/ReportForm";
 import { Campaigns, Chains } from "@/components/PrayTogether";
 import SessionList from "@/components/SessionList";
 import { api, errorMessage } from "@/lib/api";
@@ -68,7 +69,14 @@ export default function GroupPage() {
   const [reports, setReports] = useState<PrayerReport[]>([]);
   const [about, setAbout] = useState<PrayerAbout | null>(null);
   const [missing, setMissing] = useState(false);
-  const [panel, setPanel] = useState<null | "schedule" | "edit" | "leave">(null);
+  const [panel, setPanel] = useState<
+    null | "schedule" | "edit" | "leave" | "report"
+  >(null);
+  // The member being reported, or null when the report is about the group.
+  const [reporting, setReporting] = useState<{
+    userId: string;
+    name: string;
+  } | null>(null);
   const [place, setPlace] = useState("online");
   const [notice, setNotice] = useState<string | null>(null);
   // What the meeting provider told us about a session just scheduled.
@@ -216,7 +224,10 @@ export default function GroupPage() {
         <dl className="flex max-w-2xl flex-col text-sm">
           {(
             [
-              ["Led by", group.leaders.join(", ")],
+              [
+                group.leaders.length === 1 ? "Group admin" : "Group admins",
+                group.leaders.join(", "),
+              ],
               ["Meets", group.schedule],
               ["Theme", group.theme],
               ["Church", group.church],
@@ -261,6 +272,17 @@ export default function GroupPage() {
         </div>
       ) : null}
 
+      {group.status === "suspended" ? (
+        <div className="flex max-w-2xl flex-col gap-2 rounded-xl border border-gold-bright bg-gold-soft p-5 leading-7">
+          <p className="font-medium">This group is suspended</p>
+          <p>
+            A site moderator suspended it while a complaint is looked at.
+            Members cannot post or meet until it is open again.
+          </p>
+          {group.statusNote ? <p>Reason: {group.statusNote}</p> : null}
+        </div>
+      ) : null}
+
       {pending ? (
         <p className="max-w-2xl rounded-xl border border-line bg-surface p-5 leading-7">
           This group is waiting for a moderator to approve it. You can invite
@@ -269,12 +291,12 @@ export default function GroupPage() {
       ) : null}
       {group.myStatus === "applied" ? (
         <p className="max-w-2xl rounded-xl border border-line bg-surface p-5 leading-7">
-          You asked to join. A leader will look at your request.
+          You asked to join. A group admin will look at your request.
         </p>
       ) : null}
       {group.myStatus === "removed" ? (
         <p className="max-w-2xl rounded-xl border border-line bg-surface p-5 leading-7">
-          A leader removed you from this group. Contact the prayer team if you
+          You were removed from this group. Contact the prayer team if you
           think this is a mistake.
         </p>
       ) : null}
@@ -332,7 +354,7 @@ export default function GroupPage() {
 
       {!inside && !canJoin && !group.myStatus && group.status === "active" ? (
         <p className="max-w-2xl text-sm leading-6 text-muted">
-          People join this group by invitation from a leader.
+          People join this group by invitation from a group admin.
         </p>
       ) : null}
 
@@ -672,6 +694,21 @@ export default function GroupPage() {
                       {GROUP_ROLE_LABELS[person.role]}
                     </span>
                   </span>
+                  {!group.canLead && !person.isYou ? (
+                    <button
+                      type="button"
+                      className="text-muted underline underline-offset-4"
+                      onClick={() => {
+                        setReporting({
+                          userId: person.userId,
+                          name: person.name,
+                        });
+                        setPanel("report");
+                      }}
+                    >
+                      Report
+                    </button>
+                  ) : null}
                   {group.canLead && !person.isYou ? (
                     <span className="flex flex-wrap items-center gap-x-4 gap-y-1">
                       <select
@@ -705,6 +742,19 @@ export default function GroupPage() {
                         }
                       >
                         Remove
+                      </button>
+                      <button
+                        type="button"
+                        className="text-muted underline underline-offset-4"
+                        onClick={() => {
+                          setReporting({
+                            userId: person.userId,
+                            name: person.name,
+                          });
+                          setPanel("report");
+                        }}
+                      >
+                        Report
                       </button>
                     </span>
                   ) : null}
@@ -749,12 +799,51 @@ export default function GroupPage() {
           <Section id="code" title="Code of conduct">
             <Rules code={group.codeOfConduct} />
             <p className="text-sm leading-6 text-muted">
-              To report something, open the request and choose Report. The
-              leaders of this group look at every report.
+              To report a request or a reply, open it and choose Report. The
+              admins and moderators of this group look at those. Reports
+              about a member or about the group go to the site moderators.
             </p>
           </Section>
         </>
       ) : null}
+
+      {panel === "report" ? (
+        <ReportForm
+          key={reporting?.userId ?? "group"}
+          path={
+            reporting
+              ? `${base}/members/${reporting.userId}/report`
+              : `${base}/report`
+          }
+          question={
+            reporting
+              ? `What is wrong with how ${reporting.name} behaves?`
+              : "What is wrong with this group?"
+          }
+          goesTo="This goes to the site moderators, not to the group's admins. No one in the group is told who sent it."
+          onSent={() => {
+            setPanel(null);
+            setReporting(null);
+            setNotice("Thank you. A site moderator will look at it.");
+          }}
+          onCancel={() => setPanel(null)}
+        />
+      ) : null}
+
+      {group.status === "pending" || group.myStatus === "removed" ? null : (
+        <div>
+          <button
+            type="button"
+            className="text-sm text-muted underline underline-offset-4"
+            onClick={() => {
+              setReporting(null);
+              setPanel(panel === "report" ? null : "report");
+            }}
+          >
+            Report this group
+          </button>
+        </div>
+      )}
 
       {group.myStatus === "active" ? (
         <section className="flex flex-col gap-4 border-t border-line pt-6">

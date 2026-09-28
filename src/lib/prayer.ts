@@ -85,6 +85,7 @@ export interface PrayerGroupDetail extends PrayerGroup {
   codeOfConduct: string;
   groupRules: string;
   membershipRules: string | null;
+  statusNote: string | null;
   canModerate: boolean;
   canLead: boolean;
   members: GroupMember[] | null;
@@ -116,8 +117,12 @@ export interface PrayerSession {
 export interface PrayerReport {
   id: string;
   kind: string;
+  groupId: string | null;
+  groupName: string | null;
   requestId: string | null;
+  memberName: string | null;
   text: string | null;
+  category: string;
   reason: string;
   reports: number;
   at: string;
@@ -149,6 +154,8 @@ export interface ModerationQueue {
     church: string | null;
     city: string | null;
     region: string | null;
+    membershipRules: string | null;
+    groupRules: string | null;
     leader: string;
     leaderEmail: string;
     leaderIdentity: string;
@@ -182,13 +189,47 @@ export const ACCESS_LABELS: Record<string, string> = {
 
 export const ACCESS_NOTES: Record<string, string> = {
   open: "Anyone can join straight away.",
-  apply: "People ask to join and a leader approves each one.",
-  invite: "The group is listed, but people join only when a leader invites them.",
+  apply: "People ask to join and a group admin approves each one.",
+  invite:
+    "The group is listed, but people join only when a group admin invites them.",
   private: "The group is not listed. People join only by invitation.",
 };
 
+export interface ManagedGroup {
+  id: string;
+  name: string;
+  access: string;
+  status: string;
+  statusNote: string | null;
+  city: string | null;
+  region: string | null;
+  members: number;
+  admins: string[];
+  openReports: number;
+  since: string;
+}
+
+export const REPORT_CATEGORY_LABELS: Record<string, string> = {
+  harassment: "Harassment, threats, or hateful speech",
+  discrimination: "Shutting people out by race, color, or origin",
+  money: "Asking for money or selling",
+  pressure: "Pressure to share, attend, or believe",
+  confidence: "Breaking confidence",
+  danger: "Someone may be in danger",
+  spam: "Spam or not about prayer",
+  other: "Something else",
+};
+
+export const REPORT_KIND_LABELS: Record<string, string> = {
+  request: "A prayer request",
+  response: "A reply",
+  member: "A member",
+  group: "A group",
+};
+
+// "leader" is the stored name for a group's admin.
 export const GROUP_ROLE_LABELS: Record<string, string> = {
-  leader: "Leader",
+  leader: "Group admin",
   moderator: "Moderator",
   member: "Member",
 };

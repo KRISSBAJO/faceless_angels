@@ -18,7 +18,7 @@ import {
   isLeader,
   isPrayerModerator,
   membership,
-  PLATFORM_CODE_OF_CONDUCT,
+  codeOfConduct,
 } from './prayer.shared';
 
 interface GroupRow {
@@ -35,7 +35,8 @@ interface GroupRow {
   schedule: string | null;
   access: string;
   status: string;
-  code_of_conduct: string;
+  group_rules: string | null;
+  status_note: string | null;
   membership_rules: string | null;
   decline_note: string | null;
   created_by: string;
@@ -59,13 +60,6 @@ const GROUP_SQL = `
   from prayer_groups g
   left join prayer_group_members me
     on me.group_id = g.id and me.user_id = $1`;
-
-function groupRules(code: string) {
-  // Everything after the platform's own code is what the leaders added.
-  return code.startsWith(PLATFORM_CODE_OF_CONDUCT)
-    ? code.slice(PLATFORM_CODE_OF_CONDUCT.length).trim()
-    : '';
-}
 
 function summary(row: GroupRow) {
   return {
@@ -214,7 +208,7 @@ export class PrayerGroupsService {
         `insert into prayer_groups
            (name, description, theme, language, church, city, region,
             meets_online, timezone, schedule, access, status,
-            code_of_conduct, membership_rules, created_by, approved_by)
+            group_rules, membership_rules, created_by, approved_by)
          values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13,
                  $14, $15, $16)
          returning id`,
@@ -253,8 +247,10 @@ export class PrayerGroupsService {
     const inside = isActiveMember(me);
     const base = {
       ...summary(row),
-      codeOfConduct: row.code_of_conduct,
-      groupRules: groupRules(row.code_of_conduct),
+      codeOfConduct: codeOfConduct(row.group_rules),
+      groupRules: row.group_rules ?? '',
+      // Members are told why their group is suspended.
+      statusNote: row.status === 'suspended' ? row.status_note : null,
       membershipRules: row.membership_rules,
       declineNote: row.created_by === viewer.id ? row.decline_note : null,
       canModerate: canModerateGroup(me),
@@ -305,7 +301,7 @@ export class PrayerGroupsService {
          set name = $2, description = $3, theme = $4, language = $5,
              church = $6, city = $7, region = $8, meets_online = $9,
              timezone = $10, schedule = $11, access = $12,
-             code_of_conduct = $13, membership_rules = $14,
+             group_rules = $13, membership_rules = $14,
              updated_at = now()
          where id = $1`,
         [
@@ -338,7 +334,7 @@ export class PrayerGroupsService {
     if (row.my_status === 'active') return { status: 'active' };
     if (row.my_status === 'removed') {
       throw new ForbiddenException(
-        'A leader removed you from this group. Contact the prayer team if you think this is a mistake.',
+        'You were removed from this group. Contact the prayer team if you think this is a mistake.',
       );
     }
     const invited = row.my_status === 'invited';
@@ -377,7 +373,7 @@ export class PrayerGroupsService {
         );
         if (others.rowCount === 0) {
           throw new ConflictException(
-            'You are the only leader. Make someone else a leader before you leave.',
+            'You are the only admin of this group. Make someone else an admin before you leave.',
           );
         }
       }
@@ -407,7 +403,7 @@ export class PrayerGroupsService {
     this.requireLeader(row, user);
     if (memberId === user.id) {
       throw new BadRequestException(
-        'You cannot change your own place in the group. Ask another leader.',
+        'You cannot change your own place in the group. Ask another admin of the group.',
       );
     }
     const target = await membership(this.db, groupId, memberId);
@@ -534,7 +530,7 @@ export class PrayerGroupsService {
     const leads = row.my_status === 'active' && row.my_role === 'leader';
     // Moderators for the whole network can step in when a group has trouble.
     if (!leads && !isPrayerModerator(user)) {
-      throw new ForbiddenException('Only a leader of the group can do that.');
+      throw new ForbiddenException('Only an admin of the group can do that.');
     }
   }
 
@@ -571,6 +567,7 @@ export class PrayerGroupsService {
     const connected = ['active', 'applied', 'invited'].includes(
       row.my_status ?? '',
     );
+    // A suspended group stays visible to its own members, with the reason.
     if (row.status !== 'active' && !connected) throw missing;
     if (row.access === 'private' && !connected) throw missing;
     return row;
@@ -593,9 +590,6 @@ export class PrayerGroupsService {
   }
 
   private code(dto: GroupDto) {
-    const extra = dto.groupRules?.trim();
-    return extra
-      ? `${PLATFORM_CODE_OF_CONDUCT}\n\n${extra}`
-      : PLATFORM_CODE_OF_CONDUCT;
+    return dto.groupRules?.trim() || null;
   }
 }

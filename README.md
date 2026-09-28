@@ -54,7 +54,9 @@ Staff cannot sign themselves up. An administrator invites them from
 - Reviewer workspace: checks, questions, decisions, and appeals
 - A list of approved needs with no names, and pledges from Angels
 - Prayer: requests with four audiences, a network wall, and answered prayers
-- Prayer groups with leaders, moderators, and a code of conduct
+- Prayer groups with their own admins and moderators, and a code of conduct
+- Reports of abuse about a request, a reply, a member, or a group
+- Site moderation of groups: approve, suspend, open again, or close
 - Live prayer sessions on Patvero, Zoom, or Teams, or in person
 - Prayer campaigns over a set number of days, and prayer chains taken in turns
 - A prayer team inbox and a moderation queue
@@ -84,6 +86,10 @@ does not yet.
 - A reviewer cannot review their own request or decide an appeal of their own
   decision.
 - A personal prayer request is never open to staff, whatever their role.
+- No group may shut people out by race, color, or origin. Every group keeps
+  this rule, and members can report a group that breaks it.
+- A report about a member or a group goes to site moderators, never to that
+  group's own admins. The person reported is not told who sent it.
 - Prayer has no part in who receives help. Prayer roles cannot open cases.
 - Emails to reserved test domains such as `example.test` are never sent.
 

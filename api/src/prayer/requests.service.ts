@@ -427,7 +427,7 @@ export class PrayerRequestsService {
       : null;
     if (row.audience !== 'group' || !canModerateGroup(member)) {
       throw new ForbiddenException(
-        'Only a leader or moderator of the group can pass a request on.',
+        'Only an admin or moderator of the group can pass a request on.',
       );
     }
     if (!row.allow_forward) {
@@ -449,6 +449,7 @@ export class PrayerRequestsService {
     user: SessionUser,
     type: 'request' | 'response',
     id: string,
+    category: string,
     reason: string,
   ) {
     const target = await this.target(user, type, id);
@@ -458,10 +459,10 @@ export class PrayerRequestsService {
     await this.db.tx(async (client) => {
       const inserted = await client.query(
         `insert into prayer_reports
-           (target_type, target_id, group_id, reporter_id, reason)
-         values ($1, $2, $3, $4, $5)
+           (target_type, target_id, group_id, reporter_id, category, reason)
+         values ($1, $2, $3, $4, $5, $6)
          on conflict (target_type, target_id, reporter_id) do nothing`,
-        [type, id, target.groupId, user.id, reason.trim()],
+        [type, id, target.groupId, user.id, category, reason.trim()],
       );
       if (inserted.rowCount === 0) {
         throw new ConflictException('You already reported this.');

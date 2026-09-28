@@ -218,7 +218,7 @@ export default function GroupForm({
         <Field
           id="membershipRules"
           label="Who the group is for (optional)"
-          hint="For example: women of our church, or parents of teenagers."
+          hint="For example: women of our church, or parents of teenagers. A group may not shut people out by race, color, or where they come from."
         >
           <input
             id="membershipRules"
@@ -263,8 +263,8 @@ export default function GroupForm({
               required
             />
             <span>
-              I will lead this group by the code of conduct. My full name is
-              shown as its leader, and I will look at reports from members.
+              I will run this group by the code of conduct. My full name is
+              shown as its admin, and I will look at reports from members.
             </span>
           </label>
         )}

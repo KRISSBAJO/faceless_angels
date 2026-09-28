@@ -2,15 +2,34 @@ import type { SessionUser } from '../auth/auth.service';
 import { PRAYER_MODERATOR_ROLES, PRAYER_TEAM_ROLES, type Role } from '../config';
 import type { Queryable } from '../db/db.service';
 
-/** Every group starts from this. Leaders may add to it, never remove it. */
+/** Every group keeps this. Group admins may add to it, never remove it. */
 export const PLATFORM_CODE_OF_CONDUCT = [
   'Keep what is shared here in confidence.',
   'Pray for people, never about them.',
+  'No group may shut anyone out, or single anyone out, because of race, color, or where they come from.',
   'Do not ask members for money or sell anything.',
   'Do not pressure anyone to share, to attend, or to believe as you do.',
   'Treat every person with respect. No harassment, threats, or hateful speech.',
-  'If someone may be in danger, tell a leader and point them to emergency help.',
+  'If someone may be in danger, tell a group admin and point them to emergency help.',
 ].join('\n');
+
+/** The whole code a group's members agree to. */
+export function codeOfConduct(groupRules: string | null) {
+  return groupRules?.trim()
+    ? `${PLATFORM_CODE_OF_CONDUCT}\n${groupRules.trim()}`
+    : PLATFORM_CODE_OF_CONDUCT;
+}
+
+export const REPORT_CATEGORIES = [
+  'harassment',
+  'discrimination',
+  'money',
+  'pressure',
+  'confidence',
+  'danger',
+  'spam',
+  'other',
+] as const;
 
 export const CRISIS_RESOURCES =
   'If you are in immediate danger, call 911. If you are thinking about harming yourself, call or text 988 to reach the Suicide and Crisis Lifeline. For domestic violence, call 1-800-799-7233.';

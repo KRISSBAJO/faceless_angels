@@ -15,6 +15,7 @@ import {
   ValidateIf,
 } from 'class-validator';
 import { PROVIDER_KEYS } from './meeting-providers';
+import { REPORT_CATEGORIES } from './prayer.shared';
 
 export const AUDIENCES = ['personal', 'group', 'team', 'network'] as const;
 export const LIFETIMES = [7, 30, 90] as const;
@@ -100,9 +101,22 @@ export class ResponseDto {
 }
 
 export class ReportDto {
+  @IsIn(REPORT_CATEGORIES, { message: 'Choose what kind of problem it is.' })
+  category: (typeof REPORT_CATEGORIES)[number];
+
   @IsString()
   @Length(5, 500, { message: 'Tell us what is wrong in a few words.' })
   reason: string;
+}
+
+export class GroupStatusDto {
+  @IsIn(['suspend', 'reinstate', 'close'], { message: 'Choose what to do.' })
+  action: 'suspend' | 'reinstate' | 'close';
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  note?: string;
 }
 
 export class BlockDto {

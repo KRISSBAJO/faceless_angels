@@ -5,12 +5,19 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import type { PoolClient } from 'pg';
 import { AuditService } from '../audit/audit.service';
 import type { SessionUser } from '../auth/auth.service';
 import { config } from '../config';
 import { DbService } from '../db/db.service';
 import { MailService } from '../mail/mail.service';
-import { GroupDecisionDto, ModerateDto } from './prayer.dto';
+import { PrayerGroupsService } from './groups.service';
+import {
+  GroupDecisionDto,
+  GroupStatusDto,
+  ModerateDto,
+  ReportDto,
+} from './prayer.dto';
 import {
   canModerateGroup,
   displayName,
@@ -19,39 +26,52 @@ import {
 } from './prayer.shared';
 import { REQUEST_SQL, RequestRow, viewRequest } from './requests.service';
 
+type TargetType = 'request' | 'response' | 'member' | 'group';
+
 interface ReportRow {
   id: string;
-  target_type: 'request' | 'response';
+  target_type: TargetType;
   target_id: string;
   group_id: string | null;
+  group_name: string | null;
+  category: string;
   reason: string;
   created_at: Date;
   text: string | null;
+  member_name: string | null;
   request_id: string | null;
   others: number;
 }
 
 const REPORT_SQL = `
-  select p.id, p.target_type, p.target_id, p.group_id, p.reason,
-         p.created_at,
-         coalesce(r.body, s.body) as text,
+  select p.id, p.target_type, p.target_id, p.group_id, g.name as group_name,
+         p.category, p.reason, p.created_at,
+         coalesce(r.body, s.body, g.description) as text,
+         m.full_name as member_name,
          coalesce(r.id, s.request_id) as request_id,
          (select count(*)::int from prayer_reports o
           where o.target_type = p.target_type and o.target_id = p.target_id
             and o.resolved_at is null) as others
   from prayer_reports p
+  left join prayer_groups g on g.id = p.group_id
   left join prayer_requests r
     on p.target_type = 'request' and r.id = p.target_id
   left join prayer_responses s
     on p.target_type = 'response' and s.id = p.target_id
+  left join users m on p.target_type = 'member' and m.id = p.target_id
   where p.resolved_at is null`;
 
 function viewReport(row: ReportRow) {
   return {
     id: row.id,
     kind: row.target_type,
+    groupId: row.group_id,
+    groupName: row.group_name,
     requestId: row.request_id,
-    text: row.text,
+    // A reported member is named in full, so the right person is dealt with.
+    memberName: row.member_name,
+    text: row.target_type === 'member' ? null : row.text,
+    category: row.category,
     reason: row.reason,
     reports: row.others,
     at: row.created_at,
@@ -64,6 +84,7 @@ export class PrayerModerationService {
     private readonly db: DbService,
     private readonly audit: AuditService,
     private readonly mail: MailService,
+    private readonly groups: PrayerGroupsService,
   ) {}
 
   /** Requests written to the prayer team, and group requests passed on to it. */
@@ -126,23 +147,24 @@ export class PrayerModerationService {
           church: string | null;
           city: string | null;
           region: string | null;
+          membership_rules: string | null;
+          group_rules: string | null;
           leader: string;
           leader_email: string;
           identity_status: string;
           created_at: Date;
         }>(
           `select g.id, g.name, g.description, g.access, g.language,
-                  g.church, g.city, g.region, u.full_name as leader,
+                  g.church, g.city, g.region, g.membership_rules,
+                  g.group_rules, u.full_name as leader,
                   u.email as leader_email, u.identity_status, g.created_at
            from prayer_groups g join users u on u.id = g.created_by
            where g.status = 'pending' and g.created_by <> $1
            order by g.created_at`,
           [viewer.id],
         ),
-        this.db.query<ReportRow>(
-          // Reports inside a group go to that group's own leaders first.
-          `${REPORT_SQL} and p.group_id is null order by p.created_at`,
-        ),
+        // Site moderators see every open report, whichever group it is in.
+        this.db.query<ReportRow>(`${REPORT_SQL} order by p.created_at`),
         this.db.query<RequestRow>(
           `${REQUEST_SQL}
            where r.needs_care and r.audience in ('group', 'network')
@@ -179,6 +201,8 @@ export class PrayerModerationService {
         church: g.church,
         city: g.city,
         region: g.region,
+        membershipRules: g.membership_rules,
+        groupRules: g.group_rules,
         leader: g.leader,
         leaderEmail: g.leader_email,
         leaderIdentity: g.identity_status,
@@ -317,7 +341,7 @@ export class PrayerModerationService {
       paragraphs: approve
         ? [
             `Hello ${group.full_name},`,
-            `Your prayer group ${group.name} is approved. You can now invite people and schedule sessions.`,
+            `Your prayer group ${group.name} is approved, and you are its admin. You can now invite people, appoint other admins and moderators, and schedule sessions.`,
           ]
         : [
             `Hello ${group.full_name},`,
@@ -333,11 +357,181 @@ export class PrayerModerationService {
     });
   }
 
-  /** Open reports inside one group, for its leaders and moderators. */
+  // ---- Every group, for site moderators
+
+  async allGroups() {
+    const found = await this.db.query<{
+      id: string;
+      name: string;
+      access: string;
+      status: string;
+      status_note: string | null;
+      city: string | null;
+      region: string | null;
+      created_at: Date;
+      members: number;
+      admins: string[] | null;
+      open_reports: number;
+    }>(
+      `select g.id, g.name, g.access, g.status, g.status_note, g.city,
+              g.region, g.created_at,
+              (select count(*)::int from prayer_group_members m
+               where m.group_id = g.id and m.status = 'active') as members,
+              (select array_agg(u.full_name order by m.joined_at)
+               from prayer_group_members m join users u on u.id = m.user_id
+               where m.group_id = g.id and m.status = 'active'
+                 and m.role = 'leader') as admins,
+              (select count(*)::int from prayer_reports p
+               where p.group_id = g.id and p.resolved_at is null)
+                as open_reports
+       from prayer_groups g
+       where g.status in ('active', 'suspended')
+       order by (g.status = 'suspended') desc, open_reports desc, g.name`,
+    );
+    return found.rows.map((g) => ({
+      id: g.id,
+      name: g.name,
+      access: g.access,
+      status: g.status,
+      statusNote: g.status_note,
+      city: g.city,
+      region: g.region,
+      members: g.members,
+      admins: g.admins ?? [],
+      openReports: g.open_reports,
+      since: g.created_at,
+    }));
+  }
+
+  async setGroupStatus(user: SessionUser, id: string, dto: GroupStatusDto) {
+    if (dto.action !== 'reinstate' && !dto.note?.trim()) {
+      throw new BadRequestException(
+        'Say why. The group’s admins are told the reason.',
+      );
+    }
+    const group = await this.db.tx((client) =>
+      this.changeStatus(client, user, id, dto.action, dto.note?.trim()),
+    );
+    await this.tellAdmins(id, group.name, dto.action, dto.note?.trim());
+  }
+
+  private async changeStatus(
+    client: PoolClient,
+    user: SessionUser,
+    id: string,
+    action: 'suspend' | 'reinstate' | 'close',
+    note: string | undefined,
+  ) {
+    const from = action === 'reinstate' ? ['suspended'] : ['active', 'suspended'];
+    const to =
+      action === 'suspend'
+        ? 'suspended'
+        : action === 'close'
+          ? 'closed'
+          : 'active';
+    const updated = await client.query<{ name: string; was: string }>(
+      `update prayer_groups g
+       set status = $2, status_note = $3, status_changed_by = $4,
+           status_changed_at = now(), updated_at = now()
+       from (select id, status as was from prayer_groups
+             where id = $1 for update) old
+       where g.id = old.id and old.was = any($5) and old.was <> $2
+       returning g.name, old.was`,
+      [id, to, action === 'reinstate' ? null : note, user.id, from],
+    );
+    const group = updated.rows[0];
+    if (!group) {
+      throw new ConflictException('The group is not in a state to do that.');
+    }
+    await this.audit.record(client, {
+      actorId: user.id,
+      action: `prayer_group.${action}`,
+      objectType: 'prayer_group',
+      objectId: id,
+      priorState: group.was,
+      newState: to,
+      reason: note,
+    });
+    return group;
+  }
+
+  private async tellAdmins(
+    groupId: string,
+    name: string,
+    action: 'suspend' | 'reinstate' | 'close',
+    note: string | undefined,
+  ) {
+    const subject =
+      action === 'suspend'
+        ? `${name} is suspended`
+        : action === 'close'
+          ? `${name} is closed`
+          : `${name} is open again`;
+    const line =
+      action === 'suspend'
+        ? `A site moderator suspended ${name} while a complaint is looked at. Members cannot post or meet until it is open again.`
+        : action === 'close'
+          ? `A site moderator closed ${name}.`
+          : `${name} is open again. Thank you for your patience.`;
+    await this.groups.tellLeaders(
+      groupId,
+      subject,
+      note ? `${line} Reason: ${note}` : line,
+    );
+  }
+
+  // ---- Reports
+
+  /**
+   * A report about a member or about the group itself. These go to site
+   * moderators only, because the group's own admins may be the problem.
+   */
+  async reportGroup(
+    user: SessionUser,
+    groupId: string,
+    memberId: string | null,
+    dto: ReportDto,
+  ) {
+    // Anyone who can see a group may report it. Only members report members.
+    const group = await this.groups.find(this.db, user, groupId);
+    if (memberId) {
+      if (memberId === user.id) {
+        throw new BadRequestException('You cannot report yourself.');
+      }
+      if (group.my_status !== 'active') {
+        throw new ForbiddenException('Only members can report a member.');
+      }
+      const target = await membership(this.db, groupId, memberId);
+      if (target?.status !== 'active') {
+        throw new NotFoundException('That person is not in the group.');
+      }
+    }
+    const inserted = await this.db.query(
+      `insert into prayer_reports
+         (target_type, target_id, group_id, reporter_id, category, reason)
+       values ($1, $2, $3, $4, $5, $6)
+       on conflict (target_type, target_id, reporter_id) do nothing`,
+      [
+        memberId ? 'member' : 'group',
+        memberId ?? groupId,
+        groupId,
+        user.id,
+        dto.category,
+        dto.reason.trim(),
+      ],
+    );
+    if (inserted.rowCount === 0) {
+      throw new ConflictException('You already reported this.');
+    }
+  }
+
+  /** Open reports on what was written in one group, for its admins and moderators. */
   async groupReports(user: SessionUser, groupId: string) {
     await this.requireGroupModerator(user, groupId);
     const found = await this.db.query<ReportRow>(
-      `${REPORT_SQL} and p.group_id = $1 order by p.created_at`,
+      `${REPORT_SQL} and p.group_id = $1
+         and p.target_type in ('request', 'response')
+       order by p.created_at`,
       [groupId],
     );
     return found.rows.map(viewReport);
@@ -349,14 +543,19 @@ export class PrayerModerationService {
     action: 'keep' | 'remove',
   ) {
     const found = await this.db.query<{
-      target_type: string;
+      target_type: TargetType;
       target_id: string;
       group_id: string | null;
+      group_name: string | null;
       author_id: string | null;
+      reason: string;
     }>(
-      `select p.target_type, p.target_id, p.group_id,
-              coalesce(r.author_id, s.author_id) as author_id
+      `select p.target_type, p.target_id, p.group_id, g.name as group_name,
+              p.reason,
+              case when p.target_type = 'member' then p.target_id
+                   else coalesce(r.author_id, s.author_id) end as author_id
        from prayer_reports p
+       left join prayer_groups g on g.id = p.group_id
        left join prayer_requests r
          on p.target_type = 'request' and r.id = p.target_id
        left join prayer_responses s
@@ -368,58 +567,97 @@ export class PrayerModerationService {
     if (!report) {
       throw new ConflictException('This report was already handled.');
     }
-    if (report.group_id) {
+    const aboutPeople =
+      report.target_type === 'member' || report.target_type === 'group';
+    if (aboutPeople || !report.group_id) {
+      if (!isPrayerModerator(user)) {
+        throw new ForbiddenException('Your account cannot handle this report.');
+      }
+    } else {
       await this.requireGroupModerator(user, report.group_id);
-    } else if (!isPrayerModerator(user)) {
-      throw new ForbiddenException('Your account cannot handle reports.');
     }
     if (report.author_id === user.id) {
       throw new ForbiddenException(
-        'This report is about your own words. Someone else must handle it.',
+        'This report is about you. Someone else must handle it.',
       );
     }
 
     await this.db.tx(async (client) => {
-      const table =
-        report.target_type === 'request'
-          ? 'prayer_requests'
-          : 'prayer_responses';
-      if (action === 'remove') {
-        await client.query(
-          `update ${table} set status = 'hidden' where id = $1`,
-          [report.target_id],
-        );
+      if (report.target_type === 'group') {
+        if (action === 'remove') {
+          await this.changeStatus(
+            client,
+            user,
+            report.target_id,
+            'suspend',
+            `Suspended after a report: ${report.reason}`.slice(0, 500),
+          );
+        }
+      } else if (report.target_type === 'member') {
+        if (action === 'remove') {
+          await client.query(
+            `update prayer_group_members set status = 'removed', role = 'member'
+             where group_id = $1 and user_id = $2`,
+            [report.group_id, report.target_id],
+          );
+          await client.query(
+            `update prayer_requests set status = 'hidden',
+               moderation_note = 'Hidden because you are no longer in the group.'
+             where group_id = $1 and author_id = $2 and status = 'active'`,
+            [report.group_id, report.target_id],
+          );
+        }
       } else {
-        // Undo an automatic hide when the content turns out to be fine.
+        const table =
+          report.target_type === 'request'
+            ? 'prayer_requests'
+            : 'prayer_responses';
         await client.query(
-          `update ${table} set status = 'active'
-           where id = $1 and status = 'hidden'`,
+          action === 'remove'
+            ? `update ${table} set status = 'hidden' where id = $1`
+            : // Undo an automatic hide when the content turns out to be fine.
+              `update ${table} set status = 'active'
+               where id = $1 and status = 'hidden'`,
           [report.target_id],
         );
       }
       await client.query(
         `update prayer_reports
          set resolved_at = now(), resolved_by = $3, outcome = $4
-         where target_type = $1 and target_id = $2 and resolved_at is null`,
-        [report.target_type, report.target_id, user.id, action],
+         where target_type = $1 and target_id = $2 and resolved_at is null
+           and (group_id is not distinct from $5)`,
+        [
+          report.target_type,
+          report.target_id,
+          user.id,
+          action,
+          report.group_id,
+        ],
       );
       await this.audit.record(client, {
         actorId: user.id,
         action: `prayer_report.${action}`,
-        objectType:
-          report.target_type === 'request'
-            ? 'prayer_request'
-            : 'prayer_response',
+        objectType: `prayer_${report.target_type}`,
         objectId: report.target_id,
+        reason: report.group_name,
       });
     });
+
+    if (report.target_type === 'group' && action === 'remove') {
+      await this.tellAdmins(
+        report.target_id,
+        report.group_name ?? 'Your group',
+        'suspend',
+        report.reason,
+      );
+    }
   }
 
   private async requireGroupModerator(user: SessionUser, groupId: string) {
     if (isPrayerModerator(user)) return;
     if (!canModerateGroup(await membership(this.db, groupId, user.id))) {
       throw new ForbiddenException(
-        'Only a leader or moderator of the group can do that.',
+        'Only an admin or moderator of the group can do that.',
       );
     }
   }

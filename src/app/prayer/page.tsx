@@ -244,7 +244,7 @@ export default function PrayerPage() {
                 ],
                 [
                   "Join a prayer group",
-                  "Find a group by language, place, theme, or church. Each one has named leaders and a code of conduct.",
+                  "Find a group by language, place, theme, or church. Each one has named admins and a code of conduct.",
                 ],
                 [
                   "Pray live",

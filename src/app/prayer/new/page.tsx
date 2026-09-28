@@ -222,7 +222,7 @@ export default function NewPrayerPage() {
                 ],
                 [
                   "allowForward",
-                  "Let a group leader pass this to the prayer team",
+                  "Let a group admin pass this to the prayer team",
                   "Off means it never leaves the group.",
                   false,
                   audience === "group",

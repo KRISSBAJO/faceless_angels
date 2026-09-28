@@ -9,6 +9,9 @@ import { api, ApiError, errorMessage } from "@/lib/api";
 import { formatMoment } from "@/lib/format";
 import {
   ACCESS_LABELS,
+  REPORT_CATEGORY_LABELS,
+  REPORT_KIND_LABELS,
+  type ManagedGroup,
   type ModerationQueue,
   type PrayerAbout,
   type PrayerRequest,
@@ -122,10 +125,138 @@ function Decide({
   );
 }
 
+function GroupRow({
+  group,
+  busy,
+  onAct,
+}: {
+  group: ManagedGroup;
+  busy: boolean;
+  onAct: (action: "suspend" | "reinstate" | "close", note?: string) => void;
+}) {
+  const [asking, setAsking] = useState<null | "suspend" | "close">(null);
+  const suspended = group.status === "suspended";
+
+  return (
+    <li className="flex flex-col gap-3 border-t border-line py-5 first:border-t-0">
+      <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-2">
+        <div className="flex flex-col gap-1">
+          <Link
+            href={`/prayer/groups/${group.id}`}
+            className="font-medium underline-offset-4 hover:underline"
+          >
+            {group.name}
+          </Link>
+          <span className="text-sm text-muted">
+            {[
+              ACCESS_LABELS[group.access],
+              group.city && group.region
+                ? `${group.city}, ${group.region}`
+                : (group.city ?? group.region),
+              group.members === 1 ? "1 member" : `${group.members} members`,
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+          </span>
+          <span className="text-sm text-muted">
+            {group.admins.length === 0
+              ? "No admin"
+              : `Admins: ${group.admins.join(", ")}`}
+          </span>
+        </div>
+        <div className="flex flex-col gap-1 text-sm sm:items-end">
+          <span className={suspended ? "font-medium" : "text-muted"}>
+            {suspended ? "Suspended" : "Open"}
+          </span>
+          {group.openReports > 0 ? (
+            <span className="font-medium tabular-nums">
+              {group.openReports === 1
+                ? "1 open report"
+                : `${group.openReports} open reports`}
+            </span>
+          ) : null}
+        </div>
+      </div>
+      {suspended && group.statusNote ? (
+        <p className="text-sm">Reason: {group.statusNote}</p>
+      ) : null}
+
+      {asking ? (
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            const note = String(new FormData(event.currentTarget).get("note"));
+            onAct(asking, note.trim());
+            setAsking(null);
+          }}
+          className="flex flex-wrap items-end gap-3"
+        >
+          <label className="flex min-w-64 flex-1 flex-col gap-1.5 text-sm font-medium">
+            {asking === "suspend"
+              ? "Why is the group suspended?"
+              : "Why is the group closed?"}
+            <input
+              name="note"
+              className="input font-normal"
+              placeholder="The group's admins and members read this."
+              required
+              minLength={10}
+              maxLength={500}
+            />
+          </label>
+          <button
+            type="submit"
+            className="btn btn-primary px-4 py-2 text-sm"
+            disabled={busy}
+          >
+            {asking === "suspend" ? "Suspend the group" : "Close for good"}
+          </button>
+          <button
+            type="button"
+            className="btn btn-ghost px-4 py-2 text-sm"
+            onClick={() => setAsking(null)}
+          >
+            Cancel
+          </button>
+        </form>
+      ) : (
+        <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
+          {suspended ? (
+            <button
+              type="button"
+              className="underline underline-offset-4"
+              disabled={busy}
+              onClick={() => onAct("reinstate")}
+            >
+              Open the group again
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="underline underline-offset-4"
+              onClick={() => setAsking("suspend")}
+            >
+              Suspend
+            </button>
+          )}
+          <button
+            type="button"
+            className="text-muted underline underline-offset-4"
+            onClick={() => setAsking("close")}
+          >
+            Close for good
+          </button>
+        </div>
+      )}
+    </li>
+  );
+}
+
 export default function PrayerTeamPage() {
   const user = useRequiredUser();
   const [inbox, setInbox] = useState<PrayerRequest[] | null>(null);
   const [queue, setQueue] = useState<ModerationQueue | null>(null);
+  const [groups, setGroups] = useState<ManagedGroup[]>([]);
   const [about, setAbout] = useState<PrayerAbout | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -140,9 +271,11 @@ export default function PrayerTeamPage() {
     return Promise.all([
       allowed(api<PrayerRequest[]>("/prayer/team/inbox")),
       allowed(api<ModerationQueue>("/prayer/team/queue")),
-    ]).then(([i, q]) => {
+      allowed(api<ManagedGroup[]>("/prayer/team/groups")),
+    ]).then(([i, q, g]) => {
       setInbox(i);
       setQueue(q);
+      setGroups(g ?? []);
       if (!i && !q) setError("Your account cannot open this page.");
     });
   }, []);
@@ -342,14 +475,37 @@ export default function PrayerTeamPage() {
                   className="flex flex-col gap-2 border-t border-line py-5 first:border-t-0"
                 >
                   <p className="text-sm text-muted">
-                    {report.kind === "request" ? "A request" : "A reply"} ·
-                    reported {formatMoment(report.at)}
+                    {REPORT_KIND_LABELS[report.kind] ?? report.kind}
+                    {report.groupName ? (
+                      <>
+                        {" in "}
+                        <Link
+                          href={`/prayer/groups/${report.groupId}`}
+                          className="underline underline-offset-4"
+                        >
+                          {report.groupName}
+                        </Link>
+                      </>
+                    ) : (
+                      " on the network wall"
+                    )}{" "}
+                    · reported {formatMoment(report.at)}
                     {report.reports > 1 ? ` · ${report.reports} reports` : ""}
                   </p>
-                  <p className="whitespace-pre-wrap break-words leading-7">
-                    {report.text}
+                  <p className="font-medium">
+                    {REPORT_CATEGORY_LABELS[report.category] ?? report.category}
                   </p>
-                  <p className="text-sm">Reason given: {report.reason}</p>
+                  {report.memberName ? (
+                    <p className="leading-7">
+                      About the member <strong>{report.memberName}</strong>
+                    </p>
+                  ) : null}
+                  {report.text ? (
+                    <p className="whitespace-pre-wrap break-words border-l-2 border-line pl-4 leading-7">
+                      {report.text}
+                    </p>
+                  ) : null}
+                  <p className="text-sm">What they said: {report.reason}</p>
                   <div className="flex flex-wrap gap-3">
                     <button
                       type="button"
@@ -361,7 +517,11 @@ export default function PrayerTeamPage() {
                         })
                       }
                     >
-                      Remove it
+                      {report.kind === "group"
+                        ? "Suspend the group"
+                        : report.kind === "member"
+                          ? "Remove the member from the group"
+                          : "Remove it"}
                     </button>
                     <button
                       type="button"
@@ -373,7 +533,9 @@ export default function PrayerTeamPage() {
                         })
                       }
                     >
-                      It is fine, keep it
+                      {report.kind === "group" || report.kind === "member"
+                        ? "No action needed"
+                        : "It is fine, keep it"}
                     </button>
                   </div>
                 </li>
@@ -415,8 +577,21 @@ export default function PrayerTeamPage() {
                   <p className="whitespace-pre-wrap break-words text-sm leading-6">
                     {group.description}
                   </p>
+                  {group.membershipRules ? (
+                    <p className="text-sm">For: {group.membershipRules}</p>
+                  ) : null}
+                  {group.groupRules ? (
+                    <p className="whitespace-pre-wrap text-sm">
+                      Own rules: {group.groupRules}
+                    </p>
+                  ) : null}
+                  <p className="text-sm text-muted">
+                    Check that the group does not shut people out by race,
+                    color, or where they come from.
+                  </p>
                   <p className="text-sm">
-                    Leader: <strong>{group.leader}</strong> ·{" "}
+                    Started by <strong>{group.leader}</strong>, who becomes
+                    its admin ·{" "}
                     <span className="break-all">{group.leaderEmail}</span> ·{" "}
                     {IDENTITY[group.leaderIdentity] ?? group.leaderIdentity}
                   </p>
@@ -433,6 +608,27 @@ export default function PrayerTeamPage() {
                     }
                   />
                 </li>
+              ))}
+            </ul>
+          </Block>
+          <Block
+            title="All groups"
+            count={groups.length}
+            empty="No groups are open."
+          >
+            <ul className="flex flex-col">
+              {groups.map((group) => (
+                <GroupRow
+                  key={group.id}
+                  group={group}
+                  busy={busy}
+                  onAct={(action, note) =>
+                    void act(`/prayer/team/groups/${group.id}/status`, {
+                      action,
+                      note,
+                    })
+                  }
+                />
               ))}
             </ul>
           </Block>

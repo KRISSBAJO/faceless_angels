@@ -27,6 +27,7 @@ import {
   EditPrayerDto,
   GroupDecisionDto,
   GroupDto,
+  GroupStatusDto,
   InviteMemberDto,
   JoinDto,
   MemberActionDto,
@@ -193,7 +194,13 @@ export class PrayerController {
     @Id() id: string,
     @Body() dto: ReportDto,
   ) {
-    await this.requests.report(user, 'request', id, dto.reason);
+    await this.requests.report(
+      user,
+      'request',
+      id,
+      dto.category,
+      dto.reason,
+    );
   }
 
   @Post('responses/:id/report')
@@ -204,7 +211,13 @@ export class PrayerController {
     @Id() id: string,
     @Body() dto: ReportDto,
   ) {
-    await this.requests.report(user, 'response', id, dto.reason);
+    await this.requests.report(
+      user,
+      'response',
+      id,
+      dto.category,
+      dto.reason,
+    );
   }
 
   @Get('blocks')
@@ -314,6 +327,29 @@ export class PrayerController {
   async groupWall(@CurrentUser() user: SessionUser, @Id() id: string) {
     await this.groups.assertMember(user, id);
     return this.requests.groupWall(user, id);
+  }
+
+  @Post('groups/:id/report')
+  @HttpCode(204)
+  @Throttle(WRITES)
+  async reportGroup(
+    @CurrentUser() user: SessionUser,
+    @Id() id: string,
+    @Body() dto: ReportDto,
+  ) {
+    await this.moderation.reportGroup(user, id, null, dto);
+  }
+
+  @Post('groups/:id/members/:userId/report')
+  @HttpCode(204)
+  @Throttle(WRITES)
+  async reportMember(
+    @CurrentUser() user: SessionUser,
+    @Id() id: string,
+    @Id('userId') memberId: string,
+    @Body() dto: ReportDto,
+  ) {
+    await this.moderation.reportGroup(user, id, memberId, dto);
   }
 
   @Get('groups/:id/reports')
@@ -522,6 +558,23 @@ export class PrayerController {
     @Body() dto: ModerateDto,
   ) {
     await this.moderation.moderateTestimony(user, id, dto);
+  }
+
+  @Get('team/groups')
+  @Roles(...PRAYER_MODERATOR_ROLES)
+  allGroups() {
+    return this.moderation.allGroups();
+  }
+
+  @Post('team/groups/:id/status')
+  @HttpCode(204)
+  @Roles(...PRAYER_MODERATOR_ROLES)
+  async setGroupStatus(
+    @CurrentUser() user: SessionUser,
+    @Id() id: string,
+    @Body() dto: GroupStatusDto,
+  ) {
+    await this.moderation.setGroupStatus(user, id, dto);
   }
 
   @Post('team/groups/:id')

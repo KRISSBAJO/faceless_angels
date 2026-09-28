@@ -57,7 +57,7 @@ export default function GroupsPage() {
         <div className="flex max-w-2xl flex-col gap-3">
           <h1 className="font-serif text-4xl sm:text-5xl">Prayer groups</h1>
           <p className="leading-7 text-muted">
-            Every group has named leaders and a code of conduct.
+            Every group has named admins and a code of conduct.
           </p>
         </div>
         <Link href="/prayer/groups/new" className="btn btn-primary">
@@ -162,7 +162,7 @@ export default function GroupsPage() {
                 <dl className="mt-auto flex flex-col gap-1 pt-2 text-sm">
                   {(
                     [
-                      ["Led by", group.leaders.join(", ")],
+                      ["Admins", group.leaders.join(", ")],
                       ["Meets", group.schedule],
                       ["Theme", group.theme],
                       ["Church", group.church],
