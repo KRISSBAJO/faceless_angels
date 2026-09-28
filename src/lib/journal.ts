@@ -151,6 +151,8 @@ export interface StudioArticleDetail extends StudioArticle {
 
 export interface ArticleStats {
   views: number;
+  shares: number;
+  sharedTo: Record<string, number>;
   last30Days: { day: string; views: number }[];
   readersStarted: number;
   readersFinished: number;

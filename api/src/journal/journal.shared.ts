@@ -5,6 +5,15 @@ import { config, JOURNAL_STAFF_ROLES, type Role } from '../config';
 export const KINDS = ['teaching', 'devotional', 'testimony', 'story'] as const;
 export const ACTIONS = ['none', 'pray', 'group', 'give', 'ask'] as const;
 export const REACTIONS = ['amen', 'encouraged', 'praying'] as const;
+export const SHARE_CHANNELS = [
+  'device',
+  'whatsapp',
+  'facebook',
+  'x',
+  'linkedin',
+  'email',
+  'link',
+] as const;
 
 const WORDS_PER_MINUTE = 220;
 

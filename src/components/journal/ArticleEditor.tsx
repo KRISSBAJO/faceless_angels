@@ -18,6 +18,7 @@ import {
   type StudioSeries,
 } from "@/lib/journal";
 import { Field, FormError } from "../Field";
+import ShareBar from "../ShareBar";
 import BodyEditor from "./BodyEditor";
 
 interface Draft {
@@ -115,6 +116,16 @@ function Panel({
   );
 }
 
+const SHARE_NAMES: Record<string, string> = {
+  device: "Phone share sheet",
+  whatsapp: "WhatsApp",
+  facebook: "Facebook",
+  x: "X",
+  linkedin: "LinkedIn",
+  email: "Email",
+  link: "Copied link",
+};
+
 function Stats({ articleId }: { articleId: string }) {
   const [stats, setStats] = useState<ArticleStats | null>(null);
 
@@ -133,11 +144,12 @@ function Stats({ articleId }: { articleId: string }) {
 
   return (
     <Panel title="How it is doing">
-      <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-4">
+      <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-5">
         {(
           [
             ["Views", stats.views],
             ["Read to the end", finished === null ? "No data" : `${finished}%`],
+            ["Shared", stats.shares],
             ["Comments", stats.comments],
             ["Saved", stats.saved],
           ] as const
@@ -182,6 +194,14 @@ function Stats({ articleId }: { articleId: string }) {
           : `${stats.notes} readers kept private notes`}
         . Notes are never shown to staff.
       </p>
+      {stats.shares > 0 ? (
+        <p className="text-sm text-muted">
+          Shared on:{" "}
+          {Object.entries(stats.sharedTo)
+            .map(([channel, n]) => `${SHARE_NAMES[channel] ?? channel} ${n}`)
+            .join(" · ")}
+        </p>
+      ) : null}
     </Panel>
   );
 }
@@ -1073,7 +1093,19 @@ export default function ArticleEditor({
         </aside>
       </div>
 
-      {article && stage === "published" ? <Stats articleId={article.id} /> : null}
+      {article && stage === "published" ? (
+        <>
+          <section className="flex flex-col gap-3 border-t border-line pt-5">
+            <h2 className="font-medium">Share it</h2>
+            <ShareBar
+              path={`/journal/${article.slug}`}
+              title={article.title}
+              summary={article.summary}
+            />
+          </section>
+          <Stats articleId={article.id} />
+        </>
+      ) : null}
 
       {article && stage === "published" && article.can.edit ? (
         <Panel title="Corrections">

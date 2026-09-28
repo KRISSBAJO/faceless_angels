@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import PublicShell from "@/components/PublicShell";
+import ShareBar from "@/components/ShareBar";
 import { journal } from "@/lib/journal-server";
 import { minutes, type ArticleCard } from "@/lib/journal";
 
@@ -39,6 +40,12 @@ export default async function SeriesPage({
         </p>
         <h1 className="font-serif text-4xl sm:text-5xl">{series.title}</h1>
         <p className="leading-7 text-muted">{series.description}</p>
+        <ShareBar
+          path={`/journal/series/${series.slug}`}
+          title={series.title}
+          summary={series.description}
+          label="Share this series"
+        />
       </div>
       <ol className="flex max-w-3xl flex-col">
         {series.articles.map((article, i) => (

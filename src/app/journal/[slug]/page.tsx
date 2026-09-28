@@ -7,9 +7,11 @@ import Engagement from "@/components/journal/Engagement";
 import Markdown from "@/components/journal/Markdown";
 import { Badges, NeedFacts, PledgeProgress } from "@/components/NeedCard";
 import PublicShell from "@/components/PublicShell";
+import ShareBar from "@/components/ShareBar";
 import type { Need } from "@/lib/api";
 import { formatCents } from "@/lib/format";
 import { journal } from "@/lib/journal-server";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
 import {
   formatDate,
   KIND_LABELS,
@@ -25,18 +27,31 @@ export async function generateMetadata({
 }: PageProps<"/journal/[slug]">): Promise<Metadata> {
   const article = await journal<Article>(`/articles/${(await params).slug}`);
   if (!article) return { title: "Journal · Faceless Angels" };
+  const path = `/journal/${article.slug}`;
+  const card = { url: `${path}/card`, width: 1200, height: 630, alt: article.title };
   return {
     title: `${article.title} · Faceless Angels`,
     description: article.summary || undefined,
+    alternates: { canonical: path },
     // A draft a staff member is previewing must not be indexed.
-    robots: article.live ? undefined : { index: false },
+    robots: article.live ? undefined : { index: false, follow: false },
     openGraph: {
       title: article.title,
       description: article.summary || undefined,
+      url: path,
       type: "article",
       publishedTime: article.publishedAt ?? undefined,
+      modifiedTime: article.updatedAt,
+      section: article.category.label,
+      tags: article.tags,
       authors: [article.author.name],
-      images: article.cover ? [mediaUrl(article.cover.id)] : undefined,
+      images: [card],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: article.title,
+      description: article.summary || undefined,
+      images: [card.url],
     },
   };
 }
@@ -137,11 +152,43 @@ export default async function ArticlePage({
 
   const realPeople = article.kind === "story" || article.kind === "testimony";
 
+  // Tells search engines what the page is, so results can show the author,
+  // the date, and the picture.
+  const structured = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: article.title,
+    description: article.summary || undefined,
+    image: [`${SITE_URL}/journal/${article.slug}/card`],
+    datePublished: article.publishedAt ?? undefined,
+    dateModified: article.updatedAt,
+    articleSection: article.category.label,
+    keywords: article.tags.join(", ") || undefined,
+    author: {
+      "@type": "Person",
+      name: article.author.name,
+      url: `${SITE_URL}/journal/author/${article.author.id}`,
+    },
+    publisher: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
+    mainEntityOfPage: `${SITE_URL}/journal/${article.slug}`,
+  };
+
   return (
     <PublicShell>
       <Link href="/journal" className="text-sm text-muted hover:text-ink">
         ← Journal
       </Link>
+
+      {article.live ? (
+        <script
+          type="application/ld+json"
+          // Written by us from our own data. "<" is escaped so the text
+          // cannot close the script tag.
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(structured).replace(/</g, "\\u003c"),
+          }}
+        />
+      ) : null}
 
       {article.live ? null : (
         <p className="max-w-3xl rounded-lg border border-gold-bright bg-gold-soft px-4 py-3 text-sm">
@@ -160,6 +207,14 @@ export default async function ArticlePage({
             <p className="text-xl leading-8 text-muted">{article.summary}</p>
           ) : null}
           <Byline article={article} />
+          {article.live ? (
+            <ShareBar
+              path={`/journal/${article.slug}`}
+              title={article.title}
+              summary={article.summary}
+              articleId={article.id}
+            />
+          ) : null}
         </header>
 
         {article.cover ? (

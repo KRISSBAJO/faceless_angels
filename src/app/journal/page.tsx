@@ -14,6 +14,10 @@ export const metadata: Metadata = {
   title: "Journal · Faceless Angels",
   description:
     "Devotionals, Bible study, and Christian living, with true stories of prayer answered and help quietly given.",
+  alternates: {
+    canonical: "/journal",
+    types: { "application/rss+xml": "/journal/feed.xml" },
+  },
 };
 
 export default async function JournalPage() {
@@ -44,7 +48,15 @@ export default async function JournalPage() {
             do something about it.
           </p>
         </div>
-        <SearchBox />
+        <div className="flex flex-col items-start gap-3">
+          <SearchBox />
+          <a
+            href="/journal/feed.xml"
+            className="text-sm text-muted underline underline-offset-4 hover:text-ink"
+          >
+            Follow in a feed reader
+          </a>
+        </div>
       </div>
 
       {!featured ? (

@@ -17,7 +17,7 @@ import {
   ValidateIf,
   ValidateNested,
 } from 'class-validator';
-import { ACTIONS, KINDS, REACTIONS } from './journal.shared';
+import { ACTIONS, KINDS, REACTIONS, SHARE_CHANNELS } from './journal.shared';
 
 const KEY = /^[a-z][a-z0-9_]{1,39}$/;
 
@@ -219,6 +219,11 @@ export class NoteDto {
   @IsString()
   @MaxLength(5000, { message: 'Keep your note under 5,000 characters.' })
   body: string;
+}
+
+export class ShareDto {
+  @IsIn(SHARE_CHANNELS, { message: 'Choose where it was shared.' })
+  channel: (typeof SHARE_CHANNELS)[number];
 }
 
 export class TokenDto {

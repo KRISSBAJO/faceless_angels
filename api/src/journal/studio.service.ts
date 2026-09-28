@@ -580,6 +580,7 @@ export class JournalStudioService implements OnModuleInit, OnModuleDestroy {
         comments: number;
         saved: number;
         notes: number;
+        shares: number;
       }>(
         `select
            (select coalesce(sum(views), 0)::int from journal_views
@@ -589,12 +590,21 @@ export class JournalStudioService implements OnModuleInit, OnModuleDestroy {
            (select count(*)::int from journal_bookmarks
             where article_id = $1) as saved,
            (select count(*)::int from journal_notes
-            where article_id = $1) as notes`,
+            where article_id = $1) as notes,
+           (select coalesce(sum(shares), 0)::int from journal_shares
+            where article_id = $1) as shares`,
         [id],
       ),
     ]);
+    const channels = await this.db.query<{ channel: string; n: number }>(
+      `select channel, sum(shares)::int as n from journal_shares
+       where article_id = $1 group by channel order by n desc`,
+      [id],
+    );
     return {
       views: other.rows[0].views,
+      shares: other.rows[0].shares,
+      sharedTo: Object.fromEntries(channels.rows.map((c) => [c.channel, c.n])),
       last30Days: days.rows,
       readersStarted: readers.rows[0].started,
       readersFinished: readers.rows[0].finished,

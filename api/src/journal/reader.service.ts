@@ -434,6 +434,54 @@ export class JournalReaderService {
     }
   }
 
+  async shared(articleId: string, channel: string) {
+    const live = await this.live(articleId);
+    await this.db.query(
+      `insert into journal_shares (article_id, day, channel, shares)
+       values ($1, current_date, $2, 1)
+       on conflict (article_id, day, channel)
+         do update set shares = journal_shares.shares + 1`,
+      [live.id, channel],
+    );
+  }
+
+  /** Everything public, for search engines and the news feed. */
+  async everything() {
+    const [articles, categories, series, authors] = await Promise.all([
+      this.db.query<CardRow & { updated_at: Date; body: string }>(
+        `${CARD_SQL}, a.updated_at, a.body ${CARD_FROM}
+         where ${LIVE} order by a.published_at desc limit 5000`,
+      ),
+      this.db.query<{ key: string; latest: Date | null }>(
+        `select c.key, max(a.published_at) as latest
+         from journal_categories c
+         join journal_articles a on a.category_key = c.key and ${LIVE}
+         where c.enabled group by c.key`,
+      ),
+      this.db.query<{ slug: string; latest: Date | null }>(
+        `select s.slug, max(a.published_at) as latest
+         from journal_series s
+         join journal_articles a on a.series_id = s.id and ${LIVE}
+         group by s.slug`,
+      ),
+      this.db.query<{ author_id: string; latest: Date | null }>(
+        `select a.author_id, max(a.published_at) as latest
+         from journal_articles a where ${LIVE} group by a.author_id`,
+      ),
+    ]);
+    return {
+      articles: articles.rows.map((row) => ({
+        ...card(row),
+        updatedAt: row.updated_at,
+        // The feed carries a short opening, not the whole article.
+        opening: plainText(row.body).slice(0, 600),
+      })),
+      categories: categories.rows,
+      series: series.rows,
+      authors: authors.rows.map((a) => ({ id: a.author_id, latest: a.latest })),
+    };
+  }
+
   async finished(viewer: SessionUser, articleId: string) {
     const live = await this.live(articleId);
     await this.db.query(

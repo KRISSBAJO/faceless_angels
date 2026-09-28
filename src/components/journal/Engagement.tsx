@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { api, errorMessage } from "@/lib/api";
 import { REACTION_LABELS, type Article } from "@/lib/journal";
 import { Field } from "../Field";
+import ShareBar from "../ShareBar";
 
 /**
  * Everything a reader can do with an article: react, save it, keep a
@@ -18,7 +19,6 @@ export default function Engagement({ article }: { article: Article }) {
   const [finished, setFinished] = useState(article.mine?.finished ?? false);
   const [note, setNote] = useState(article.mine?.note ?? "");
   const [noteState, setNoteState] = useState<"idle" | "saved" | string>("idle");
-  const [copied, setCopied] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const end = useRef<HTMLDivElement>(null);
   const base = `/journal/articles/${article.id}`;
@@ -78,13 +78,6 @@ export default function Engagement({ article }: { article: Article }) {
     }
   }
 
-  function copyLink() {
-    navigator.clipboard
-      .writeText(window.location.href.split("#")[0])
-      .then(() => setCopied(true))
-      .catch(() => setMessage("Copy the address from the top of your browser."));
-  }
-
   return (
     <section
       aria-label="Respond to this article"
@@ -141,17 +134,18 @@ export default function Engagement({ article }: { article: Article }) {
             Join to react, save, and keep notes
           </Link>
         )}
-        <button
-          type="button"
-          onClick={copyLink}
-          className="underline underline-offset-4"
-        >
-          {copied ? "✓ Link copied" : "Copy link to share"}
-        </button>
         {signedIn && finished ? (
           <span className="text-muted">You have read this.</span>
         ) : null}
       </div>
+
+      <ShareBar
+        path={`/journal/${article.slug}`}
+        title={article.title}
+        summary={article.summary}
+        articleId={article.id}
+        label="Share this article"
+      />
 
       {message ? (
         <p role="alert" className="text-sm">

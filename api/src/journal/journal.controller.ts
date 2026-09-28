@@ -41,6 +41,7 @@ import {
   ReactionDto,
   ReviewDto,
   SeriesDto,
+  ShareDto,
   TokenDto,
 } from './journal.dto';
 import { JournalReaderService } from './reader.service';
@@ -114,6 +115,18 @@ export class JournalController {
     @Id() id: string,
   ) {
     await this.reader.viewed(viewer, id);
+  }
+
+  @Get('everything')
+  everything() {
+    return this.reader.everything();
+  }
+
+  @Post('articles/:id/share')
+  @HttpCode(204)
+  @Throttle({ default: { ttl: 60_000, limit: 30 } })
+  async shared(@Id() id: string, @Body() dto: ShareDto) {
+    await this.reader.shared(id, dto.channel);
   }
 
   @Get('media/:id')

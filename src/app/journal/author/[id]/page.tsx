@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArticleList, Pager } from "@/components/journal/ArticleCards";
 import PublicShell from "@/components/PublicShell";
+import ShareBar from "@/components/ShareBar";
 import { journal } from "@/lib/journal-server";
 import {
   mediaUrl,
@@ -65,6 +66,11 @@ export default async function AuthorPage({
               ? "1 article"
               : `${author.articles} articles`}
           </p>
+          <ShareBar
+            path={`/journal/author/${author.id}`}
+            title={`${author.name} on Faceless Angels`}
+            summary={author.bio ?? undefined}
+          />
         </div>
       </header>
       <div className="max-w-3xl">
