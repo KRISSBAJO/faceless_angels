@@ -63,9 +63,13 @@ export default function AppShell({
   const showNav = Boolean(user) || visitorNav;
   const links: [string, string][] = [];
   if (!user) {
-    links.push(["/needs", "Needs"], ["/ask", "Ask for help"]);
+    links.push(
+      ["/needs", "Needs"],
+      ["/prayer", "Prayer"],
+      ["/ask", "Ask for help"],
+    );
   } else if (!user.mustChangePassword) {
-    links.push(["/needs", "Needs"]);
+    links.push(["/needs", "Needs"], ["/prayer", "Prayer"]);
     if (user.role === "admin" || user.role === "auditor") {
       links.push(["/admin", "Admin"]);
     }

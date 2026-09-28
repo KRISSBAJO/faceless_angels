@@ -28,6 +28,8 @@ const ROLE_NAMES: Record<string, string> = {
   senior_reviewer: 'a senior reviewer',
   payment_approver: 'a payment approver',
   editor: 'an editor',
+  prayer_team: 'a member of the prayer team',
+  pastor: 'a pastor',
   auditor: 'an auditor',
   admin: 'an administrator',
 };

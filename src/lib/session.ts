@@ -13,6 +13,8 @@ export const ROLE_LABELS: Record<string, string> = {
   senior_reviewer: "Senior reviewer",
   payment_approver: "Payment approver",
   editor: "Editor",
+  prayer_team: "Prayer team",
+  pastor: "Pastor",
   auditor: "Auditor",
   admin: "Administrator",
 };
@@ -23,6 +25,9 @@ export function homeFor(user: User) {
   if (user.role === "admin" || user.role === "auditor") return "/admin";
   if (REVIEW_ROLES.includes(user.role)) return "/review";
   if (user.role === "angel") return "/needs";
+  if (user.role === "prayer_team" || user.role === "pastor") {
+    return "/prayer/team";
+  }
   return "/requests";
 }
 

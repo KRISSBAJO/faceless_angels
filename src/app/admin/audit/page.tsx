@@ -16,6 +16,7 @@ const FILTERS: [string, string][] = [
   ["identity.", "IDs"],
   ["user.", "Accounts"],
   ["invite.", "Invitations"],
+  ["prayer", "Prayer"],
   ["category.", "Need types"],
   ["policy.", "Agreement wording"],
 ];

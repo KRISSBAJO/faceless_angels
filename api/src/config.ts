@@ -9,11 +9,19 @@ export const ROLES = [
   'senior_reviewer',
   'payment_approver',
   'editor',
+  'prayer_team',
+  'pastor',
   'auditor',
   'admin',
 ] as const;
 
 export type Role = (typeof ROLES)[number];
+
+/** Roles that read prayer requests sent to the prayer team. */
+export const PRAYER_TEAM_ROLES: Role[] = ['prayer_team', 'pastor', 'admin'];
+
+/** Roles that approve what appears in public and approve new groups. */
+export const PRAYER_MODERATOR_ROLES: Role[] = ['pastor', 'editor', 'admin'];
 
 /** Roles that may open cases and identity papers. */
 export const REVIEW_ROLES: Role[] = ['reviewer', 'senior_reviewer', 'admin'];

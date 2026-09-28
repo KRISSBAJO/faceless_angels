@@ -18,6 +18,14 @@ import { IdentityService } from './identity/identity.service';
 import { MailService } from './mail/mail.service';
 import { NeedsController } from './needs/needs.controller';
 import { NeedsService } from './needs/needs.service';
+import { PrayerGroupsService } from './prayer/groups.service';
+import { PrayerModerationService } from './prayer/moderation.service';
+import {
+  PrayerController,
+  PrayerPublicController,
+} from './prayer/prayer.controller';
+import { PrayerRequestsService } from './prayer/requests.service';
+import { PrayerSessionsService } from './prayer/sessions.service';
 import { ReviewController } from './review/review.controller';
 import { ReviewService } from './review/review.service';
 import { SeedService } from './seed.service';
@@ -46,6 +54,8 @@ class HealthController {
     IdentityController,
     ReviewController,
     NeedsController,
+    PrayerPublicController,
+    PrayerController,
     AdminController,
   ],
   providers: [
@@ -61,6 +71,10 @@ class HealthController {
     IdentityService,
     ReviewService,
     NeedsService,
+    PrayerRequestsService,
+    PrayerGroupsService,
+    PrayerSessionsService,
+    PrayerModerationService,
     AdminService,
     SeedService,
     { provide: APP_GUARD, useClass: ThrottlerGuard },

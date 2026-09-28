@@ -5,6 +5,7 @@ import OpenNeeds from "@/components/OpenNeeds";
 
 const nav = [
   { href: "/needs", label: "Needs" },
+  { href: "/prayer", label: "Prayer" },
   { href: "#how", label: "How it works" },
   { href: "#safeguards", label: "Safeguards" },
   { href: "#privacy", label: "Privacy" },
@@ -103,7 +104,7 @@ const areas = [
   },
   {
     name: "Prayer",
-    body: "Ask for prayer in private or share it anonymously. Prayer is always optional.",
+    body: "Ask for prayer, join a prayer group, and pray live together. Prayer is always optional.",
   },
   {
     name: "Journal",

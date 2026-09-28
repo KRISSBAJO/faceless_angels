@@ -53,6 +53,10 @@ Staff cannot sign themselves up. An administrator invites them from
 - Email confirmation and a private ID check
 - Reviewer workspace: checks, questions, decisions, and appeals
 - A list of approved needs with no names, and pledges from Angels
+- Prayer: requests with four audiences, a network wall, and answered prayers
+- Prayer groups with leaders, moderators, and a code of conduct
+- Live prayer sessions on Patvero, Zoom, or Teams, or in person
+- A prayer team inbox and a moderation queue
 - Admin: people, invitations, need types and limits, agreement wording, audit log
 
 ## What is not built
@@ -61,6 +65,13 @@ Payments. A pledge is a recorded promise and no money moves. Who legally
 receives and controls contributions must be settled with counsel and a payment
 provider first.
 
+Prayer chains and time-limited prayer campaigns.
+
+Sessions made through a meeting provider. Today a host pastes a join link.
+Providers sit behind one interface in `api/src/prayer/meeting-providers.ts`,
+so Patvero can gain real integration without changing group or session
+records. The Patvero link host there is assumed and must be confirmed.
+
 ## Safeguards
 
 - Bills and IDs are encrypted in the API before they are stored.
@@ -68,6 +79,8 @@ provider first.
   audit log.
 - A reviewer cannot review their own request or decide an appeal of their own
   decision.
+- A personal prayer request is never open to staff, whatever their role.
+- Prayer has no part in who receives help. Prayer roles cannot open cases.
 - Emails to reserved test domains such as `example.test` are never sent.
 
 Back up `EVIDENCE_ENCRYPTION_KEY`. Without it, stored documents cannot be read.
