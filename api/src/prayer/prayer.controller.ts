@@ -42,6 +42,12 @@ import {
 } from './prayer.shared';
 import { PrayerRequestsService } from './requests.service';
 import { PrayerSessionsService } from './sessions.service';
+import {
+  CampaignDto,
+  ChainDto,
+  PrayerTogetherService,
+  SlotDto,
+} from './together.service';
 
 const WRITES = { default: { ttl: 60_000, limit: 20 } };
 const Id = (name = 'id') => Param(name, ParseUUIDPipe);
@@ -88,6 +94,7 @@ export class PrayerController {
     private readonly groups: PrayerGroupsService,
     private readonly sessions: PrayerSessionsService,
     private readonly moderation: PrayerModerationService,
+    private readonly together: PrayerTogetherService,
   ) {}
 
   // ---- Requests
@@ -380,6 +387,94 @@ export class PrayerController {
     @Query('series') series?: string,
   ) {
     return this.sessions.cancel(user, id, series === 'yes');
+  }
+
+  // ---- Campaigns and chains
+
+  @Get('groups/:id/campaigns')
+  campaigns(@CurrentUser() user: SessionUser, @Id() id: string) {
+    return this.together.campaigns(user, id);
+  }
+
+  @Post('groups/:id/campaigns')
+  @Throttle(WRITES)
+  createCampaign(
+    @CurrentUser() user: SessionUser,
+    @Id() id: string,
+    @Body() dto: CampaignDto,
+  ) {
+    return this.together.createCampaign(user, id, dto);
+  }
+
+  @Put('campaigns/:id/member')
+  @HttpCode(204)
+  async joinCampaign(@CurrentUser() user: SessionUser, @Id() id: string) {
+    await this.together.joinCampaign(user, id, true);
+  }
+
+  @Delete('campaigns/:id/member')
+  @HttpCode(204)
+  async leaveCampaign(@CurrentUser() user: SessionUser, @Id() id: string) {
+    await this.together.joinCampaign(user, id, false);
+  }
+
+  @Put('campaigns/:id/today')
+  @HttpCode(204)
+  async prayedToday(@CurrentUser() user: SessionUser, @Id() id: string) {
+    await this.together.prayedToday(user, id, true);
+  }
+
+  @Delete('campaigns/:id/today')
+  @HttpCode(204)
+  async notPrayedToday(@CurrentUser() user: SessionUser, @Id() id: string) {
+    await this.together.prayedToday(user, id, false);
+  }
+
+  @Post('campaigns/:id/cancel')
+  @HttpCode(204)
+  async cancelCampaign(@CurrentUser() user: SessionUser, @Id() id: string) {
+    await this.together.cancelCampaign(user, id);
+  }
+
+  @Get('groups/:id/chains')
+  chains(@CurrentUser() user: SessionUser, @Id() id: string) {
+    return this.together.chains(user, id);
+  }
+
+  @Post('groups/:id/chains')
+  @Throttle(WRITES)
+  createChain(
+    @CurrentUser() user: SessionUser,
+    @Id() id: string,
+    @Body() dto: ChainDto,
+  ) {
+    return this.together.createChain(user, id, dto);
+  }
+
+  @Put('chains/:id/turn')
+  @HttpCode(204)
+  async takeTurn(
+    @CurrentUser() user: SessionUser,
+    @Id() id: string,
+    @Body() dto: SlotDto,
+  ) {
+    await this.together.takeSlot(user, id, dto.slotStart, true);
+  }
+
+  @Post('chains/:id/turn/release')
+  @HttpCode(204)
+  async releaseTurn(
+    @CurrentUser() user: SessionUser,
+    @Id() id: string,
+    @Body() dto: SlotDto,
+  ) {
+    await this.together.takeSlot(user, id, dto.slotStart, false);
+  }
+
+  @Post('chains/:id/cancel')
+  @HttpCode(204)
+  async cancelChain(@CurrentUser() user: SessionUser, @Id() id: string) {
+    await this.together.cancelChain(user, id);
   }
 
   // ---- The prayer team and moderators

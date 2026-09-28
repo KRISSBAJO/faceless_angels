@@ -161,17 +161,17 @@ export default function Home() {
 
       <main className="flex flex-col">
         {/* Hero */}
-        <section className="mx-auto grid w-full max-w-6xl items-center gap-12 px-5 py-16 lg:grid-cols-[1.1fr_1fr] lg:py-24">
-          <div className="flex flex-col gap-7">
+        <section className="mx-auto grid w-full max-w-6xl items-center gap-12 px-5 py-14 lg:grid-cols-[1.15fr_1fr] lg:py-20">
+          <div className="flex flex-col gap-6">
             <Eyebrow>A Christian community of prayer and quiet giving</Eyebrow>
-            <h1 className="font-serif text-5xl leading-[1.02] tracking-tight sm:text-7xl">
+            <h1 className="font-serif text-4xl leading-[1.08] tracking-tight sm:text-6xl">
               Pray together.
               <br />
               Help quietly.
               <br />
               <em className="text-gold">Love openly.</em>
             </h1>
-            <p className="max-w-[34rem] text-lg leading-8 text-muted">
+            <p className="max-w-[32rem] leading-7 text-muted">
               Faceless Angels is a network of prayer groups, and a way to meet
               real needs without seeking recognition. Pray with a group each
               week. Help someone who never learns your name.
@@ -192,92 +192,44 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-5">
           <article
-            aria-label="Example prayer request"
-            className="flex flex-col gap-4 rounded-2xl bg-night p-6 text-night-ink shadow-[0_24px_60px_-30px_rgba(20,33,61,0.5)] sm:p-8 lg:-ml-8 lg:mr-8"
+            aria-label="Example from a prayer group"
+            className="flex flex-col rounded-2xl border border-line bg-surface shadow-[0_24px_60px_-30px_rgba(20,33,61,0.3)]"
           >
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="font-mono text-xs uppercase tracking-[0.1em] text-night-muted">
-                Prayer request · Midweek group
+            <div className="flex flex-col gap-5 p-7 sm:p-9">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="font-mono text-xs uppercase tracking-[0.1em] text-muted">
+                  Midweek prayer group · Nashville, TN
+                </p>
+                <span className="rounded-full bg-gold-soft px-2.5 py-1 text-xs font-medium text-gold">
+                  Example
+                </span>
+              </div>
+              <p className="font-serif text-2xl leading-snug">
+                Please pray for my mother. She goes into surgery on Monday.
               </p>
-              <span className="rounded-full bg-gold-bright px-2.5 py-1 text-xs font-medium text-night">
-                Example request
-              </span>
+              <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
+                <span className="text-muted">
+                  From{" "}
+                  <span className="redacted w-24" aria-label="name hidden" />
+                </span>
+                <span className="rounded-full bg-verified-soft px-3 py-1 font-medium text-verified">
+                  ✓ You prayed
+                </span>
+              </div>
             </div>
-            <p className="font-serif text-2xl leading-snug">
-              Please pray for my mother. She goes into surgery on Monday.
-            </p>
-            <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
-              <span className="text-night-muted">
-                From{" "}
-                <span
-                  className="redacted on-night w-20"
-                  aria-label="name hidden"
-                />
+            <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-t border-line px-7 py-5 text-sm sm:px-9">
+              <span>
+                <span className="block font-medium">Evening prayer</span>
+                <span className="text-muted">
+                  Wednesday, 7:00 PM CDT · on Patvero
+                </span>
               </span>
-              <span className="rounded-full border border-night-line px-3 py-1 font-medium">
-                ✓ You prayed
+              <span className="font-medium text-verified">
+                ✓ You are coming
               </span>
             </div>
           </article>
-
-          <article
-            aria-label="Example help request"
-            className="flex flex-col gap-5 rounded-2xl border border-line bg-surface p-6 shadow-[0_24px_60px_-30px_rgba(20,33,61,0.35)] sm:p-8 lg:ml-8"
-          >
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="font-mono text-xs uppercase tracking-[0.1em] text-muted">
-                Utility assistance · Nashville, TN
-              </p>
-              <span className="rounded-full bg-gold-soft px-2.5 py-1 text-xs font-medium text-gold">
-                Example request
-              </span>
-            </div>
-            <p className="font-serif text-2xl leading-snug">
-              Single-parent household requesting assistance with an electricity
-              bill.
-            </p>
-            <p className="text-sm text-muted">
-              Requested by{" "}
-              <span className="redacted w-28" aria-label="name hidden" />
-            </p>
-            <div className="flex flex-wrap gap-2 text-sm font-medium text-verified">
-              <span className="rounded-full bg-verified-soft px-3 py-1">
-                ✓ Identity checked
-              </span>
-              <span className="rounded-full bg-verified-soft px-3 py-1">
-                ✓ Bill reviewed
-              </span>
-              <span className="rounded-full bg-verified-soft px-3 py-1">
-                ✓ Balance confirmed with provider
-              </span>
-            </div>
-            <div className="flex flex-col gap-2">
-              <div className="flex items-baseline justify-between gap-4 tabular-nums">
-                <span className="font-serif text-4xl">$187.42</span>
-                <span className="text-sm text-muted">needed</span>
-              </div>
-              <div
-                role="progressbar"
-                aria-label="Amount funded"
-                aria-valuemin={0}
-                aria-valuemax={187.42}
-                aria-valuenow={120}
-                className="h-2 overflow-hidden rounded-full bg-line"
-              >
-                <div className="h-full w-[64%] rounded-full bg-gold-bright" />
-              </div>
-              <div className="flex justify-between gap-4 text-sm tabular-nums text-muted">
-                <span>$120.00 funded</span>
-                <span>$67.42 remaining</span>
-              </div>
-            </div>
-            <p className="border-t border-line pt-4 text-sm text-muted">
-              Paid directly to the utility provider. Due Friday.
-            </p>
-          </article>
-          </div>
         </section>
 
         <PrayerHome />
@@ -285,9 +237,9 @@ export default function Home() {
         <OpenNeeds />
 
         {/* Scripture */}
-        <section className="border-y border-line bg-surface">
-          <figure className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-5 py-14 text-center">
-            <blockquote className="font-serif text-2xl italic leading-relaxed sm:text-3xl">
+        <section className="border-b border-line">
+          <figure className="mx-auto flex w-full max-w-3xl flex-col gap-3 px-5 py-12 text-center">
+            <blockquote className="font-serif text-xl italic leading-relaxed sm:text-2xl">
               But when thou doest alms, let not thy left hand know what thy
               right hand doeth: that thine alms may be in secret.
             </blockquote>
@@ -300,13 +252,74 @@ export default function Home() {
         {/* How it works */}
         <section
           id="how"
-          className="mx-auto flex w-full max-w-6xl scroll-mt-8 flex-col gap-10 px-5 py-20"
+          className="mx-auto flex w-full max-w-6xl scroll-mt-8 flex-col gap-10 px-5 py-16"
         >
-          <div className="flex max-w-2xl flex-col gap-4">
-            <Eyebrow>How giving works</Eyebrow>
-            <h2 className="font-serif text-4xl leading-tight sm:text-5xl">
-              From a private request to a paid bill
-            </h2>
+          <div className="grid gap-10 lg:grid-cols-[1fr_1fr] lg:items-center">
+            <div className="flex flex-col gap-4">
+              <Eyebrow>How giving works</Eyebrow>
+              <h2 className="font-serif text-3xl leading-tight sm:text-4xl">
+                From a private request to a paid bill
+              </h2>
+              <p className="max-w-[32rem] leading-7 text-muted">
+                The person you help never learns your name. Every gift is
+                still recorded, checked, and accounted for.
+              </p>
+            </div>
+            <article
+              aria-label="Example help request"
+              className="flex flex-col gap-5 rounded-2xl border border-line bg-surface p-6 shadow-[0_24px_60px_-30px_rgba(20,33,61,0.35)] sm:p-8"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="font-mono text-xs uppercase tracking-[0.1em] text-muted">
+                  Utility assistance · Nashville, TN
+                </p>
+                <span className="rounded-full bg-gold-soft px-2.5 py-1 text-xs font-medium text-gold">
+                  Example request
+                </span>
+              </div>
+              <p className="font-serif text-2xl leading-snug">
+                Single-parent household requesting assistance with an electricity
+                bill.
+              </p>
+              <p className="text-sm text-muted">
+                Requested by{" "}
+                <span className="redacted w-28" aria-label="name hidden" />
+              </p>
+              <div className="flex flex-wrap gap-2 text-sm font-medium text-verified">
+                <span className="rounded-full bg-verified-soft px-3 py-1">
+                  ✓ Identity checked
+                </span>
+                <span className="rounded-full bg-verified-soft px-3 py-1">
+                  ✓ Bill reviewed
+                </span>
+                <span className="rounded-full bg-verified-soft px-3 py-1">
+                  ✓ Balance confirmed with provider
+                </span>
+              </div>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-baseline justify-between gap-4 tabular-nums">
+                  <span className="font-serif text-4xl">$187.42</span>
+                  <span className="text-sm text-muted">needed</span>
+                </div>
+                <div
+                  role="progressbar"
+                  aria-label="Amount funded"
+                  aria-valuemin={0}
+                  aria-valuemax={187.42}
+                  aria-valuenow={120}
+                  className="h-2 overflow-hidden rounded-full bg-line"
+                >
+                  <div className="h-full w-[64%] rounded-full bg-gold-bright" />
+                </div>
+                <div className="flex justify-between gap-4 text-sm tabular-nums text-muted">
+                  <span>$120.00 funded</span>
+                  <span>$67.42 remaining</span>
+                </div>
+              </div>
+              <p className="border-t border-line pt-4 text-sm text-muted">
+                Paid directly to the utility provider. Due Friday.
+              </p>
+            </article>
           </div>
           <ol className="grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-5 lg:gap-x-6">
             {steps.map((step, i) => (
@@ -328,12 +341,12 @@ export default function Home() {
 
         {/* Two views */}
         <section className="bg-night text-night-ink">
-          <div className="mx-auto grid w-full max-w-6xl gap-12 px-5 py-20 lg:grid-cols-[1fr_1.15fr] lg:items-center">
+          <div className="mx-auto grid w-full max-w-6xl gap-12 px-5 py-16 lg:grid-cols-[1fr_1.15fr] lg:items-center">
             <div className="flex flex-col gap-5">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gold-bright">
                 Privacy with accountability
               </p>
-              <h2 className="font-serif text-4xl leading-tight sm:text-5xl">
+              <h2 className="font-serif text-3xl leading-tight sm:text-4xl">
                 The Angel may be faceless. The transaction never is.
               </h2>
               <p className="max-w-[32rem] leading-7 text-night-muted">
@@ -350,11 +363,11 @@ export default function Home() {
         {/* Safeguards */}
         <section
           id="safeguards"
-          className="mx-auto grid w-full max-w-6xl scroll-mt-8 gap-14 px-5 py-20 lg:grid-cols-2"
+          className="mx-auto grid w-full max-w-6xl scroll-mt-8 gap-14 px-5 py-16 lg:grid-cols-2"
         >
           <div className="flex flex-col gap-6">
             <Eyebrow>Safeguards</Eyebrow>
-            <h2 className="font-serif text-4xl leading-tight sm:text-5xl">
+            <h2 className="font-serif text-3xl leading-tight sm:text-4xl">
               We pay the need, not the applicant
             </h2>
             <p className="max-w-[34rem] leading-7 text-muted">
@@ -399,10 +412,10 @@ export default function Home() {
           id="privacy"
           className="scroll-mt-8 border-y border-line bg-surface"
         >
-          <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-5 py-20">
+          <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-5 py-16">
             <div className="flex max-w-2xl flex-col gap-4">
               <Eyebrow>Privacy</Eyebrow>
-              <h2 className="font-serif text-4xl leading-tight sm:text-5xl">
+              <h2 className="font-serif text-3xl leading-tight sm:text-4xl">
                 You choose how much of yourself is seen
               </h2>
               <p className="leading-7 text-muted">
@@ -459,11 +472,11 @@ export default function Home() {
         {/* Community */}
         <section
           id="community"
-          className="mx-auto flex w-full max-w-6xl scroll-mt-8 flex-col gap-10 px-5 py-20"
+          className="mx-auto flex w-full max-w-6xl scroll-mt-8 flex-col gap-10 px-5 py-16"
         >
           <div className="flex max-w-2xl flex-col gap-4">
             <Eyebrow>Community</Eyebrow>
-            <h2 className="font-serif text-4xl leading-tight sm:text-5xl">
+            <h2 className="font-serif text-3xl leading-tight sm:text-4xl">
               More than a place to give
             </h2>
             <p className="leading-7 text-muted">
@@ -491,9 +504,9 @@ export default function Home() {
 
         {/* Closing */}
         <section id="start" className="scroll-mt-8 bg-night text-night-ink">
-          <div className="mx-auto grid w-full max-w-6xl gap-6 px-5 py-20 lg:grid-cols-3">
+          <div className="mx-auto grid w-full max-w-6xl gap-6 px-5 py-16 lg:grid-cols-3">
             <div className="flex flex-col items-start gap-4 rounded-2xl border border-night-line p-7 sm:p-10">
-              <h2 className="font-serif text-3xl sm:text-4xl">
+              <h2 className="font-serif text-2xl sm:text-3xl">
                 Pray with a group
               </h2>
               <p className="leading-7 text-night-muted">
@@ -508,7 +521,7 @@ export default function Home() {
               </Link>
             </div>
             <div className="flex flex-col items-start gap-4 rounded-2xl border border-night-line p-7 sm:p-10">
-              <h2 className="font-serif text-3xl sm:text-4xl">
+              <h2 className="font-serif text-2xl sm:text-3xl">
                 Become someone&apos;s Angel
               </h2>
               <p className="leading-7 text-night-muted">
@@ -523,7 +536,7 @@ export default function Home() {
               </Link>
             </div>
             <div className="flex flex-col items-start gap-4 rounded-2xl border border-night-line p-7 sm:p-10">
-              <h2 className="font-serif text-3xl sm:text-4xl">
+              <h2 className="font-serif text-2xl sm:text-3xl">
                 Ask for help, or for a neighbor
               </h2>
               <p className="leading-7 text-night-muted">

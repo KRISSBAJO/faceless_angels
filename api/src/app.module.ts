@@ -26,6 +26,7 @@ import {
 } from './prayer/prayer.controller';
 import { PrayerRequestsService } from './prayer/requests.service';
 import { PrayerSessionsService } from './prayer/sessions.service';
+import { PrayerTogetherService } from './prayer/together.service';
 import { ReviewController } from './review/review.controller';
 import { ReviewService } from './review/review.service';
 import { SeedService } from './seed.service';
@@ -74,6 +75,7 @@ class HealthController {
     PrayerRequestsService,
     PrayerGroupsService,
     PrayerSessionsService,
+    PrayerTogetherService,
     PrayerModerationService,
     AdminService,
     SeedService,

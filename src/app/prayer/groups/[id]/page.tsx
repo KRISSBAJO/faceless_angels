@@ -7,6 +7,7 @@ import AppShell from "@/components/AppShell";
 import { Field, FormError } from "@/components/Field";
 import GroupForm, { type GroupValues } from "@/components/GroupForm";
 import PrayerCard from "@/components/PrayerCard";
+import { Campaigns, Chains } from "@/components/PrayTogether";
 import SessionList from "@/components/SessionList";
 import { api, errorMessage } from "@/lib/api";
 import { formatMoment } from "@/lib/format";
@@ -70,6 +71,8 @@ export default function GroupPage() {
   const [panel, setPanel] = useState<null | "schedule" | "edit" | "leave">(null);
   const [place, setPlace] = useState("online");
   const [notice, setNotice] = useState<string | null>(null);
+  // What the meeting provider told us about a session just scheduled.
+  const [hostNotes, setHostNotes] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -165,9 +168,10 @@ export default function GroupPage() {
     const form = new FormData(event.currentTarget);
     const text = (name: string) => String(form.get(name) ?? "").trim();
     const online = place !== "in_person";
-    void run(
-      () =>
-        api(`${base}/sessions`, {
+    void run(async () => {
+      const made = await api<{ created: number; notes: string[] }>(
+        `${base}/sessions`,
+        {
           body: {
             title: text("title"),
             startsLocal: text("startsLocal"),
@@ -180,9 +184,10 @@ export default function GroupPage() {
             notes: text("notes") || undefined,
             weeks: Number(text("weeks")),
           },
-        }),
-      "Scheduled.",
-    );
+        },
+      );
+      setHostNotes(made.notes);
+    }, "Scheduled.");
   }
 
   return (
@@ -240,6 +245,20 @@ export default function GroupPage() {
         <p role="status" className="text-sm text-verified">
           {notice}
         </p>
+      ) : null}
+
+      {hostNotes.length > 0 ? (
+        <div
+          role="status"
+          className="flex max-w-2xl flex-col gap-2 rounded-xl border border-gold-bright bg-gold-soft p-5 text-sm leading-6"
+        >
+          <p className="font-medium">Before the session</p>
+          <ul className="flex list-disc flex-col gap-1 pl-5">
+            {hostNotes.map((note) => (
+              <li key={note}>{note}</li>
+            ))}
+          </ul>
+        </div>
       ) : null}
 
       {pending ? (
@@ -405,7 +424,11 @@ export default function GroupPage() {
                     <Field
                       id="url"
                       label="Join link"
-                      hint="Paste the link from the meeting you made. Members see it only after they say they are coming."
+                      hint={
+                        place === "patvero"
+                          ? "Make the meeting in Patvero, then paste its link. It looks like https://www.patvero.com/?room=abc12-xyz9q. Members see it only after they say they are coming."
+                          : "Paste the link from the meeting you made. Members see it only after they say they are coming."
+                      }
                     >
                       <input
                         id="url"
@@ -495,6 +518,18 @@ export default function GroupPage() {
                 </div>
               )
             ) : null}
+          </Section>
+
+          <Section id="campaigns" title="Campaigns">
+            <Campaigns groupId={group.id} canLead={group.canLead} />
+          </Section>
+
+          <Section id="chains" title="Prayer chains">
+            <Chains
+              groupId={group.id}
+              canLead={group.canLead}
+              timezone={group.timezone}
+            />
           </Section>
 
           <Section id="wall" title="Prayer requests in this group">

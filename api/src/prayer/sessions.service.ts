@@ -150,7 +150,7 @@ export class PrayerSessionsService implements OnModuleInit, OnModuleDestroy {
         'Sessions can be scheduled once the group is approved.',
       );
     }
-    const link = checkMeetingLink(dto.provider, dto.url);
+    const link = await checkMeetingLink(dto.provider, dto.url);
     const place = dto.place?.trim() || null;
     if (!link.url && !place) {
       throw new BadRequestException(
@@ -170,11 +170,11 @@ export class PrayerSessionsService implements OnModuleInit, OnModuleDestroy {
         `insert into prayer_sessions
            (group_id, host_id, series_id, title, starts_at, timezone,
             duration_minutes, capacity, provider, url, place, notes,
-            created_by)
+            created_by, external_ref)
          select $1, $2, $3, $4,
                 ($5::timestamp + make_interval(weeks => n::int))
                   at time zone $6::text,
-                $6::text, $7, $8, $9, $10, $11, $12, $2
+                $6::text, $7, $8, $9, $10, $11, $12, $2, $14
          from generate_series(0, $13::int - 1) as n
          returning id, starts_at`,
         [
@@ -191,6 +191,7 @@ export class PrayerSessionsService implements OnModuleInit, OnModuleDestroy {
           place,
           dto.notes?.trim() || null,
           weeks,
+          link.externalRef,
         ],
       );
       if (inserted.rows.some((s) => s.starts_at.getTime() < Date.now())) {
@@ -206,7 +207,7 @@ export class PrayerSessionsService implements OnModuleInit, OnModuleDestroy {
       });
       return inserted.rows;
     });
-    return { created: created.length };
+    return { created: created.length, notes: link.notes };
   }
 
   async attend(user: SessionUser, sessionId: string, on: boolean) {

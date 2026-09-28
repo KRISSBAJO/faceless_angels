@@ -56,6 +56,7 @@ Staff cannot sign themselves up. An administrator invites them from
 - Prayer: requests with four audiences, a network wall, and answered prayers
 - Prayer groups with leaders, moderators, and a code of conduct
 - Live prayer sessions on Patvero, Zoom, or Teams, or in person
+- Prayer campaigns over a set number of days, and prayer chains taken in turns
 - A prayer team inbox and a moderation queue
 - Admin: people, invitations, need types and limits, agreement wording, audit log
 
@@ -65,12 +66,15 @@ Payments. A pledge is a recorded promise and no money moves. Who legally
 receives and controls contributions must be settled with counsel and a payment
 provider first.
 
-Prayer chains and time-limited prayer campaigns.
+Sessions made through a meeting provider. Today a host makes the meeting in
+Patvero, Zoom, or Teams and pastes its link. Providers sit behind one
+interface in `api/src/prayer/meeting-providers.ts`, so Patvero can gain real
+integration without changing group or session records.
 
-Sessions made through a meeting provider. Today a host pastes a join link.
-Providers sit behind one interface in `api/src/prayer/meeting-providers.ts`,
-so Patvero can gain real integration without changing group or session
-records. The Patvero link host there is assumed and must be confirmed.
+A pasted Patvero link is checked against Patvero's public lookup, so a
+meeting that has ended or never existed is refused. Creating Patvero
+meetings from here needs Patvero to offer an API key for meetings, which it
+does not yet.
 
 ## Safeguards
 

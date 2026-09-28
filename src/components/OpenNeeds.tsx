@@ -22,13 +22,13 @@ export default async function OpenNeeds() {
   if (needs.length === 0) return null;
 
   return (
-    <section className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-5 py-20">
+    <section className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-5 py-16">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex max-w-2xl flex-col gap-4">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gold">
             Open right now
           </p>
-          <h2 className="font-serif text-4xl leading-tight sm:text-5xl">
+          <h2 className="font-serif text-3xl leading-tight sm:text-4xl">
             Needs waiting for an Angel
           </h2>
         </div>
