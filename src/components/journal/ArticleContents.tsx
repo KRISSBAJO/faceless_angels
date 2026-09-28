@@ -57,7 +57,10 @@ export function ContentsRail({ headings }: { headings: Heading[] }) {
   const current = useCurrent(headings);
   if (headings.length < 2) return null;
   return (
-    <nav aria-label="In this article" className="flex flex-col gap-3">
+    <nav
+      aria-label="In this article"
+      className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-4"
+    >
       <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">
         In this article
       </p>

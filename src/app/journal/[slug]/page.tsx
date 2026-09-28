@@ -13,6 +13,7 @@ import Markdown from "@/components/journal/Markdown";
 import { Badges, NeedFacts, PledgeProgress } from "@/components/NeedCard";
 import PublicShell from "@/components/PublicShell";
 import ShareBar from "@/components/ShareBar";
+import { CommentIcon } from "@/components/ShareIcons";
 import type { Need } from "@/lib/api";
 import { formatCents } from "@/lib/format";
 import { journal } from "@/lib/journal-server";
@@ -322,8 +323,14 @@ export default async function ArticlePage({
               {article.scripture.map((passage) => (
                 <figure key={passage.ref} className="flex flex-col gap-2">
                   {passage.text ? (
-                    <blockquote className="font-serif text-xl italic leading-relaxed sm:text-2xl sm:leading-relaxed">
-                      “{passage.text}”
+                    <blockquote
+                      className={`font-serif italic leading-relaxed ${
+                        passage.text.length > 240
+                          ? "text-lg sm:text-xl sm:leading-relaxed"
+                          : "text-xl sm:text-2xl sm:leading-relaxed"
+                      }`}
+                    >
+                      “<VerseText text={passage.text} />”
                     </blockquote>
                   ) : null}
                   <figcaption className="text-sm font-medium text-gold">
@@ -391,8 +398,8 @@ export default async function ArticlePage({
         </div>
 
         <aside className="hidden lg:block">
-          <div className="sticky top-8 flex flex-col gap-8">
-            {article.live ? (
+          {article.live ? (
+            <div className="sticky top-8 flex flex-col gap-4 rounded-2xl border border-line bg-surface p-4">
               <ShareBar
                 path={`/journal/${article.slug}`}
                 title={article.title}
@@ -400,20 +407,21 @@ export default async function ArticlePage({
                 articleId={article.id}
                 stacked
               />
-            ) : null}
-            {article.live && (article.allowComments || article.comments > 0) ? (
-              <a
-                href="#comments"
-                className="text-sm font-medium underline underline-offset-4"
-              >
-                {article.comments === 0
-                  ? "Start the conversation"
-                  : article.comments === 1
-                    ? "1 comment"
-                    : `${article.comments} comments`}
-              </a>
-            ) : null}
-          </div>
+              {article.allowComments || article.comments > 0 ? (
+                <a
+                  href="#comments"
+                  className="flex items-center gap-2.5 border-t border-line pt-3 text-sm font-medium hover:text-gold"
+                >
+                  <CommentIcon className="size-4 shrink-0" />
+                  {article.comments === 0
+                    ? "Add a comment"
+                    : article.comments === 1
+                      ? "1 comment"
+                      : `${article.comments} comments`}
+                </a>
+              ) : null}
+            </div>
+          ) : null}
         </aside>
       </div>
 
@@ -541,6 +549,31 @@ export default async function ArticlePage({
         </section>
       ) : null}
     </PublicShell>
+  );
+}
+
+/**
+ * A passage of several verses arrives as "1 Take heed… 2 Therefore…". The
+ * verse numbers are set small and raised, as in a printed Bible.
+ */
+function VerseText({ text }: { text: string }) {
+  const parts = text.split(/(?:^|\s)(\d{1,3})\s(?=\S)/);
+  if (parts.length === 1) return <>{text}</>;
+  return (
+    <>
+      {parts.map((part, i) =>
+        i % 2 === 1 ? (
+          <span key={i}>
+            {i > 1 ? " " : ""}
+            <sup className="mr-0.5 font-sans text-[0.6em] font-semibold not-italic text-gold">
+              {part}
+            </sup>
+          </span>
+        ) : (
+          <span key={i}>{part}</span>
+        ),
+      )}
+    </>
   );
 }
 
