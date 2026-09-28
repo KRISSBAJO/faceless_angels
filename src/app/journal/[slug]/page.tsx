@@ -234,61 +234,80 @@ export default async function ArticlePage({
         </ol>
       </nav>
 
-      <header className="mx-auto flex w-full max-w-3xl flex-col items-center gap-5 text-center">
-        <p className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs font-semibold uppercase tracking-[0.14em] text-gold">
-          <span>{KIND_LABELS[article.kind] ?? article.category.label}</span>
-          {article.series ? (
-            <>
-              <span aria-hidden>·</span>
-              <Link
-                href={`/journal/series/${article.series.slug}`}
-                className="hover:underline hover:underline-offset-4"
-              >
-                {article.series.title}
-                {article.series.position
-                  ? `, part ${article.series.position}`
-                  : ""}
-              </Link>
-            </>
-          ) : null}
-        </p>
-        <h1 className="font-serif text-4xl leading-[1.1] text-balance sm:text-5xl lg:text-6xl">
-          {article.title}
-        </h1>
-        {article.summary ? (
-          <p className="max-w-2xl text-lg leading-8 text-balance text-muted sm:text-xl">
-            {article.summary}
+      {/*
+        With a cover, words and picture share the width, so the picture
+        never pushes the article below the fold. Without one, the header
+        stands alone in the middle.
+      */}
+      <header
+        className={
+          article.cover
+            ? "grid items-center gap-8 border-b border-line pb-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-14"
+            : "mx-auto flex w-full max-w-3xl flex-col items-center border-b border-line pb-10"
+        }
+      >
+        <div
+          className={`flex flex-col gap-5 ${
+            article.cover ? "" : "items-center text-center"
+          }`}
+        >
+          <p
+            className={`flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-semibold uppercase tracking-[0.14em] text-gold ${
+              article.cover ? "" : "justify-center"
+            }`}
+          >
+            <span>{KIND_LABELS[article.kind] ?? article.category.label}</span>
+            {article.series ? (
+              <>
+                <span aria-hidden>·</span>
+                <Link
+                  href={`/journal/series/${article.series.slug}`}
+                  className="hover:underline hover:underline-offset-4"
+                >
+                  {article.series.title}
+                  {article.series.position
+                    ? `, part ${article.series.position}`
+                    : ""}
+                </Link>
+              </>
+            ) : null}
           </p>
-        ) : null}
-        <div className="flex items-center gap-3 pt-1 text-left">
-          <Avatar name={author.name} photo={author.photo} size="size-11" />
-          <div className="flex flex-col text-sm">
-            <Link
-              href={`/journal/author/${author.id}`}
-              className="font-medium underline-offset-4 hover:underline"
-            >
-              {author.name}
-            </Link>
-            <span className="text-muted">
-              {article.publishedAt
-                ? formatDate(article.publishedAt)
-                : "Not published yet"}{" "}
-              · {minutes(article.readingMinutes)}
-            </span>
+          <h1 className="font-serif text-4xl leading-[1.1] text-balance sm:text-5xl">
+            {article.title}
+          </h1>
+          {article.summary ? (
+            <p className="max-w-2xl text-lg leading-8 text-balance text-muted">
+              {article.summary}
+            </p>
+          ) : null}
+          <div className="flex items-center gap-3 pt-1 text-left">
+            <Avatar name={author.name} photo={author.photo} size="size-11" />
+            <div className="flex flex-col text-sm">
+              <Link
+                href={`/journal/author/${author.id}`}
+                className="font-medium underline-offset-4 hover:underline"
+              >
+                {author.name}
+              </Link>
+              <span className="text-muted">
+                {article.publishedAt
+                  ? formatDate(article.publishedAt)
+                  : "Not published yet"}{" "}
+                · {minutes(article.readingMinutes)}
+              </span>
+            </div>
           </div>
         </div>
-      </header>
 
-      {article.cover ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={mediaUrl(article.cover.id)}
-          alt={article.cover.alt}
-          className="aspect-[2/1] w-full rounded-2xl object-cover"
-        />
-      ) : (
-        <div aria-hidden className="mx-auto h-px w-24 bg-gold-bright" />
-      )}
+        {article.cover ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={mediaUrl(article.cover.id)}
+            alt={article.cover.alt}
+            className="aspect-[3/2] w-full rounded-2xl object-cover shadow-sm"
+          />
+        ) : null}
+      </header>
 
       <div className="grid gap-10 lg:grid-cols-[11rem_minmax(0,1fr)_11rem] lg:gap-12">
         <aside className="hidden lg:block">
