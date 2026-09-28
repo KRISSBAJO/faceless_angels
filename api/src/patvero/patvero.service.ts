@@ -6,8 +6,9 @@ import { config } from '../config';
  *
  * The API is read-only: this service never writes to Patvero. The key lives
  * only here, on the server. It is sent as a Bearer token and is never logged,
- * returned to a browser, or stored anywhere else. Response shapes follow
- * Patvero's integration endpoints (/integrations/workspace and /meetings).
+ * returned to a browser, or stored anywhere else. The types below follow
+ * the published OpenAPI description (https://www.patvero.com/docs/openapi.json),
+ * and each response is checked against them before it is used.
  */
 
 export type PatveroProblem =
@@ -15,6 +16,7 @@ export type PatveroProblem =
   | 'key_rejected'
   | 'missing_scope'
   | 'rate_limited'
+  | 'unexpected_response'
   | 'unavailable';
 
 export class PatveroError extends Error {
@@ -26,13 +28,107 @@ export class PatveroError extends Error {
   }
 }
 
+// ---- Published schemas (OpenAPI components), only the fields we read.
+
+/** WorkspaceIntegrationWorkspaceDto */
+interface WorkspaceDto {
+  workspace: {
+    id: string;
+    name: string;
+    slug: string;
+    status: 'active' | 'suspended' | 'archived';
+  };
+  credential: {
+    id: string;
+    name: string;
+    keyPrefix: string;
+    scopes: string[];
+  };
+}
+
+/** WorkspaceIntegrationMeetingDto */
+interface MeetingDto {
+  id: string;
+  title: string;
+  description: string | null;
+  meetingType: 'instant' | 'scheduled' | 'recurring' | 'personal' | 'webinar';
+  scheduledStartAt: string | null;
+  scheduledDurationMinutes: number;
+  timeZone: string;
+  status: 'draft' | 'scheduled' | 'active' | 'completed' | 'cancelled';
+}
+
+/** WorkspaceIntegrationMeetingsDto */
+interface MeetingsDto {
+  meetings: MeetingDto[];
+  count: number;
+  workspaceId: string;
+}
+
+/** ApiErrorResponseDto */
+interface ErrorDto {
+  success: false;
+  error?: { code?: string; message?: string };
+  meta?: { requestId?: string };
+}
+
+// Patvero wraps every successful response as { success, data, meta }.
+interface Envelope<T> {
+  success?: boolean;
+  data?: T;
+  meta?: { requestId?: string };
+}
+
+const isString = (v: unknown): v is string => typeof v === 'string';
+const isObject = (v: unknown): v is Record<string, unknown> =>
+  typeof v === 'object' && v !== null && !Array.isArray(v);
+
+function isWorkspaceDto(v: unknown): v is WorkspaceDto {
+  if (!isObject(v) || !isObject(v.workspace) || !isObject(v.credential)) {
+    return false;
+  }
+  const { workspace: w, credential: c } = v;
+  return (
+    isString(w.id) &&
+    isString(w.name) &&
+    isString(w.status) &&
+    isString(c.name) &&
+    Array.isArray(c.scopes) &&
+    c.scopes.every(isString)
+  );
+}
+
+function isMeetingDto(v: unknown): v is MeetingDto {
+  return (
+    isObject(v) &&
+    isString(v.id) &&
+    isString(v.title) &&
+    isString(v.status) &&
+    isString(v.timeZone) &&
+    typeof v.scheduledDurationMinutes === 'number' &&
+    (v.scheduledStartAt === null || isString(v.scheduledStartAt)) &&
+    (v.description === null || isString(v.description))
+  );
+}
+
+function isMeetingsDto(v: unknown): v is MeetingsDto {
+  return (
+    isObject(v) &&
+    Array.isArray(v.meetings) &&
+    v.meetings.every(isMeetingDto) &&
+    typeof v.count === 'number' &&
+    isString(v.workspaceId)
+  );
+}
+
+// ---- What the rest of the app uses.
+
 export interface PatveroWorkspace {
   id: string;
   name: string;
-  slug: string | null;
-  status: string | null;
+  status: string;
   /** The key's own name and scopes. Its prefix and secret are not kept. */
-  keyName: string | null;
+  keyName: string;
   scopes: string[];
 }
 
@@ -40,18 +136,11 @@ export interface PatveroMeeting {
   id: string;
   title: string;
   description: string | null;
-  type: string | null;
+  type: MeetingDto['meetingType'];
   startsAt: string | null;
-  durationMinutes: number | null;
-  timeZone: string | null;
-  status: string | null;
-}
-
-// Patvero wraps every response as { success, data, meta }.
-interface Envelope<T> {
-  success?: boolean;
-  data?: T;
-  meta?: { requestId?: string };
+  durationMinutes: number;
+  timeZone: string;
+  status: MeetingDto['status'];
 }
 
 const TIMEOUT_MS = 5000;
@@ -68,53 +157,38 @@ export class PatveroService {
   }
 
   async workspace(): Promise<PatveroWorkspace> {
-    const body = await this.get<{
-      workspace?: {
-        id: string;
-        name: string;
-        slug?: string;
-        status?: string;
-      };
-      credential?: { name?: string; scopes?: string[] };
-    }>('/integrations/workspace');
-    if (!body?.workspace) throw new PatveroError('unavailable', 200);
+    const body = await this.get('/integrations/workspace', isWorkspaceDto);
     return {
       id: body.workspace.id,
       name: body.workspace.name,
-      slug: body.workspace.slug ?? null,
-      status: body.workspace.status ?? null,
-      keyName: body.credential?.name ?? null,
-      scopes: body.credential?.scopes ?? [],
+      status: body.workspace.status,
+      keyName: body.credential.name,
+      scopes: body.credential.scopes,
     };
   }
 
-  /** The workspace's meetings, newest first, as Patvero lists them. */
+  /** The workspace's meetings, as Patvero lists them (a bounded list). */
   async meetings(): Promise<PatveroMeeting[]> {
-    const body = await this.get<{
-      data?: {
-        id: string;
-        title?: string;
-        description?: string | null;
-        meetingType?: string;
-        scheduledStartAt?: string | null;
-        scheduledDurationMinutes?: number | null;
-        timeZone?: string | null;
-        status?: string;
-      }[];
-    }>('/integrations/workspace/meetings');
-    return (body?.data ?? []).map((m) => ({
+    const body = await this.get(
+      '/integrations/workspace/meetings',
+      isMeetingsDto,
+    );
+    return body.meetings.map((m) => ({
       id: m.id,
-      title: m.title?.trim() || 'Untitled meeting',
-      description: m.description ?? null,
-      type: m.meetingType ?? null,
-      startsAt: m.scheduledStartAt ?? null,
-      durationMinutes: m.scheduledDurationMinutes ?? null,
-      timeZone: m.timeZone ?? null,
-      status: m.status ?? null,
+      title: m.title.trim() || 'Untitled meeting',
+      description: m.description,
+      type: m.meetingType,
+      startsAt: m.scheduledStartAt,
+      durationMinutes: m.scheduledDurationMinutes,
+      timeZone: m.timeZone,
+      status: m.status,
     }));
   }
 
-  private async get<T>(path: string): Promise<T> {
+  private async get<T>(
+    path: string,
+    valid: (data: unknown) => data is T,
+  ): Promise<T> {
     if (!this.configured) throw new PatveroError('not_configured', null);
 
     const cached = this.cache.get(path);
@@ -145,8 +219,18 @@ export class PatveroService {
       }
 
       if (res.ok) {
-        const envelope = (await res.json().catch(() => null)) as Envelope<T> | null;
-        if (!envelope?.data) throw new PatveroError('unavailable', res.status);
+        const envelope = (await res
+          .json()
+          .catch(() => null)) as Envelope<unknown> | null;
+        if (envelope?.success !== true || !valid(envelope.data)) {
+          this.log.warn(
+            `Patvero's answer for ${path} did not match its published shape` +
+              (envelope?.meta?.requestId
+                ? ` (request ${envelope.meta.requestId})`
+                : ''),
+          );
+          throw new PatveroError('unexpected_response', res.status);
+        }
         this.cache.set(path, { at: Date.now(), value: envelope.data });
         return envelope.data;
       }
@@ -156,12 +240,13 @@ export class PatveroService {
         await pause();
         continue;
       }
-      const requestId = await res
-        .json()
-        .then((b) => (b as Envelope<unknown> | null)?.meta?.requestId)
-        .catch(() => undefined);
+      const failure = (await res.json().catch(() => null)) as ErrorDto | null;
+      const code = failure?.error?.code;
+      const requestId = failure?.meta?.requestId;
+      // The error code and request id help Patvero trace it. The message is
+      // left out: it is theirs to word, and could change.
       this.log.warn(
-        `Patvero answered ${res.status} for ${path}` +
+        `Patvero answered ${res.status}${code ? ` ${code}` : ''} for ${path}` +
           (requestId ? ` (request ${requestId})` : ''),
       );
       throw new PatveroError(

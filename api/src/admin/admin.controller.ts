@@ -61,7 +61,7 @@ export class AdminController {
       const soon = Date.now() - 60 * 60 * 1000;
       meetings = (await this.patvero.meetings())
         .filter((m) => m.startsAt && Date.parse(m.startsAt) >= soon)
-        .filter((m) => !['cancelled', 'canceled', 'ended'].includes(m.status ?? ''))
+        .filter((m) => m.status === 'scheduled' || m.status === 'active')
         .sort((a, b) => Date.parse(a.startsAt!) - Date.parse(b.startsAt!))
         .slice(0, 10);
     } catch (err) {

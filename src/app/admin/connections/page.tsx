@@ -11,6 +11,7 @@ type Problem =
   | "key_rejected"
   | "missing_scope"
   | "rate_limited"
+  | "unexpected_response"
   | "unavailable";
 
 interface PatveroMeeting {
@@ -45,6 +46,8 @@ const PROBLEMS: Record<Problem, string> = {
     "The key works but is missing a scope. Make a new key with workspace.read and meetings.read.",
   rate_limited:
     "Patvero asked us to slow down. Try again in a minute.",
+  unexpected_response:
+    "Patvero answered in a shape Faceless Angels does not recognize. Patvero may have changed its API; the details are in the API log.",
   unavailable:
     "Patvero could not be reached just now. Try again in a minute.",
 };
