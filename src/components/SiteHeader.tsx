@@ -195,7 +195,7 @@ export default function SiteHeader({
                 </Link>
                 <Link
                   href="/ask"
-                  className="rounded-full bg-ink px-4 py-2 font-medium text-paper transition-opacity hover:opacity-90"
+                  className="rounded-full bg-action px-4 py-2 font-medium text-on-action transition-colors hover:bg-action-hover"
                 >
                   Ask for help
                 </Link>

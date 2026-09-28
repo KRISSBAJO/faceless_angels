@@ -142,7 +142,7 @@ export default function Home() {
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/prayer"
-                className="rounded-full bg-ink px-6 py-3 font-medium text-paper transition-opacity hover:opacity-90"
+                className="rounded-full bg-action px-6 py-3 font-medium text-on-action transition-colors hover:bg-action-hover"
               >
                 Pray with us
               </Link>
