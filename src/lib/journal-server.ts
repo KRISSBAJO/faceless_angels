@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
+import { apiOrigin } from "@/lib/api-origin";
 
-const API_URL = process.env.API_URL ?? "http://localhost:4010";
+const API_URL = apiOrigin();
 
 /**
  * Reads from the Journal on the server, as the person making the request.

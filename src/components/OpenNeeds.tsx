@@ -2,8 +2,9 @@ import Link from "next/link";
 import type { Need } from "@/lib/api";
 import { formatCents } from "@/lib/format";
 import { Badges, NeedFacts, PledgeProgress } from "./NeedCard";
+import { apiOrigin } from "@/lib/api-origin";
 
-const API_URL = process.env.API_URL ?? "http://localhost:4010";
+const API_URL = apiOrigin();
 
 async function loadNeeds(): Promise<Need[]> {
   try {

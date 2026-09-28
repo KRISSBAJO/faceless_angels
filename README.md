@@ -47,6 +47,46 @@ a new password at first sign-in.
 Staff cannot sign themselves up. An administrator invites them from
 **Admin → Invitations**.
 
+## Going online
+
+`render.yaml` describes the whole site for [Render](https://render.com):
+
+| Part | Render type | Who can reach it |
+|---|---|---|
+| Website (`Dockerfile`) | Web service | Everyone |
+| API (`api/Dockerfile`) | Private service | Only the website |
+| Database | Postgres | Only the API |
+
+The website passes `/api` calls to the API over Render's private network
+(`src/app/api/[...path]/route.ts`), so the API never faces the internet.
+
+1. In Render, choose **New → Blueprint** and pick this repository.
+2. Fill in the values it asks for:
+   - `WEB_URL`, on both the website and the API: the public address, such as
+     `https://faceless-web.onrender.com`. Change it when the real domain is ready.
+   - `AWS_S3_BUCKET`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`. Use a
+     separate bucket from the one used on this computer.
+   - `MAIL_FROM` and `RELYKIT_API_KEY`.
+   - `SEED_OWNER_EMAIL` and `SEED_OWNER_PASSWORD` for the first administrator.
+3. Once it is running, open the API's **Environment** page and copy
+   `EVIDENCE_ENCRYPTION_KEY` somewhere safe. Render made it. Without it, the
+   stored bills and IDs cannot be read.
+4. To use your own domain, add it under the website's **Custom Domains**, set
+   `WEB_URL` on both services to it, and deploy both again.
+
+Costs: the private API and the database need paid plans. A free database is
+deleted after 30 days and has no backups, so the blueprint does not use one.
+The website can run on the free plan, but it sleeps when idle and then takes
+about a minute to wake.
+
+In production the API refuses to start without `WEB_URL` or an S3 bucket,
+because emails would link to the wrong place and documents would be lost on
+the next deploy.
+
+Rate limits count each visitor by the first address in `X-Forwarded-For`. If
+Render names a header visitors cannot forge, put its name in
+`CLIENT_IP_HEADER` on the website.
+
 ## What is built
 
 - Ask for help, as a full request or a short one for small needs

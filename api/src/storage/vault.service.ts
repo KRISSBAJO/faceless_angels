@@ -76,6 +76,11 @@ export class VaultService implements OnModuleInit {
       // Credentials come from AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.
       this.s3 = new S3Client({ region: config.storage.region });
       this.log.log('Storing documents in S3.');
+    } else if (config.production) {
+      // A hosted container loses its disk on every deploy.
+      throw new Error(
+        'AWS_S3_BUCKET must be set in production. Documents cannot live on the container disk.',
+      );
     } else {
       this.log.log('Storing documents on local disk.');
     }

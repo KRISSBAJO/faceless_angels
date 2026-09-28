@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { minutes, type JournalHome as Home } from "@/lib/journal";
+import { apiOrigin } from "@/lib/api-origin";
 
-const API_URL = process.env.API_URL ?? "http://localhost:4010";
+const API_URL = apiOrigin();
 
 async function load(): Promise<Home | null> {
   try {

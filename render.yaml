@@ -1,0 +1,82 @@
+# Render Blueprint: the website, the API, and the database.
+# In Render: New > Blueprint, pick this repository, then fill in the values
+# it asks for. See "Going online" in README.md.
+#
+# All three must stay in the same region to reach each other privately.
+# virginia is closest to the S3 bucket in us-east-1.
+
+services:
+  # The website. The only part the public can reach.
+  - type: web
+    name: faceless-web
+    runtime: docker
+    region: virginia
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /healthz
+    autoDeployTrigger: commit
+    envVars:
+      # The API's private address, as host:port.
+      - key: API_HOSTPORT
+        fromService:
+          name: faceless-api
+          type: pserv
+          property: hostport
+      # The public address, e.g. https://facelessangels.org
+      # (or https://faceless-web.onrender.com until the domain is set).
+      - key: WEB_URL
+        sync: false
+
+  # The API. Private: only the website can reach it.
+  - type: pserv
+    name: faceless-api
+    runtime: docker
+    region: virginia
+    dockerfilePath: ./api/Dockerfile
+    dockerContext: ./api
+    autoDeployTrigger: commit
+    envVars:
+      - key: PORT
+        value: "4010"
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: faceless-db
+          property: connectionString
+      # Same value as the website's WEB_URL. Links in emails point here.
+      - key: WEB_URL
+        sync: false
+      # Encrypts bills and IDs. Render makes a random one on first launch.
+      # Copy it somewhere safe: without it, stored documents cannot be read.
+      - key: EVIDENCE_ENCRYPTION_KEY
+        generateValue: true
+      - key: AWS_REGION
+        value: us-east-1
+      - key: AWS_S3_BUCKET
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: EMAIL_PROVIDER
+        value: relykit
+      - key: MAIL_FROM
+        sync: false
+      - key: RELYKIT_API_KEY
+        sync: false
+      - key: PATVERO_API_URL
+        value: https://api.patvero.com/api/v1
+      # The first administrator. They must choose a new password at first sign-in.
+      - key: SEED_OWNER_EMAIL
+        sync: false
+      - key: SEED_OWNER_PASSWORD
+        sync: false
+
+databases:
+  # No plan given, so Render uses its smallest paid plan, which is backed up.
+  # Do not choose free: a free database is deleted after 30 days and has no backups.
+  - name: faceless-db
+    databaseName: faceless_angels
+    user: faceless
+    region: virginia
+    postgresMajorVersion: "17"

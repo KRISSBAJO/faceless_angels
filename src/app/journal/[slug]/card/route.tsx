@@ -1,7 +1,8 @@
 import { ImageResponse } from "next/og";
 import type { Article } from "@/lib/journal";
+import { apiOrigin } from "@/lib/api-origin";
 
-const API_URL = process.env.API_URL ?? "http://localhost:4010";
+const API_URL = apiOrigin();
 
 const INK = "#14213d";
 const MUTED = "#55627d";

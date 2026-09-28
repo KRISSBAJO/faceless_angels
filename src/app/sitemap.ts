@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/site";
+import { apiOrigin } from "@/lib/api-origin";
 
-const API_URL = process.env.API_URL ?? "http://localhost:4010";
+const API_URL = apiOrigin();
 
 interface Everything {
   articles: { slug: string; updatedAt: string }[];
