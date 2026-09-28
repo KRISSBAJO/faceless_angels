@@ -21,6 +21,7 @@ export default function ShareBar({
   summary,
   articleId,
   label = "Share",
+  stacked = false,
 }: {
   /** The page's own address, like /journal/giving-in-secret. */
   path: string;
@@ -29,6 +30,8 @@ export default function ShareBar({
   /** When set, each share is counted for the article's numbers. */
   articleId?: string;
   label?: string;
+  /** One link per line, for a side column. */
+  stacked?: boolean;
 }) {
   const [url, setUrl] = useState("");
   const [canShare, setCanShare] = useState(false);
@@ -97,9 +100,21 @@ export default function ShareBar({
     <div
       role="group"
       aria-label={label}
-      className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm"
+      className={
+        stacked
+          ? "flex flex-col items-start gap-2 text-sm"
+          : "flex flex-wrap items-center gap-x-4 gap-y-2 text-sm"
+      }
     >
-      <span className="text-muted">{label}</span>
+      <span
+        className={
+          stacked
+            ? "pb-1 text-xs font-semibold uppercase tracking-[0.14em] text-muted"
+            : "text-muted"
+        }
+      >
+        {label}
+      </span>
       {canShare ? (
         <button
           type="button"

@@ -5,13 +5,15 @@ import AppShell from "./AppShell";
 
 /** The site frame for pages anyone can read, rendered on the server. */
 export default function PublicShell({
+  wide = false,
   children,
 }: {
+  wide?: boolean;
   children: React.ReactNode;
 }) {
   const { user } = useOptionalUser();
   return (
-    <AppShell user={user} visitorNav>
+    <AppShell user={user} visitorNav wide={wide}>
       {children}
     </AppShell>
   );

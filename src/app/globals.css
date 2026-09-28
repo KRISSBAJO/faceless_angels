@@ -159,6 +159,8 @@ h3 {
 
 .journal-prose h2 {
   font-size: 1.35rem;
+  /* Clears the top of the window when reached from the contents list. */
+  scroll-margin-top: 2rem;
 }
 
 .journal-prose h3,

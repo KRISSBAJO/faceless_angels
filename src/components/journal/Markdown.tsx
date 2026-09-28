@@ -1,5 +1,19 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { uniqueHeadingId } from "@/lib/journal";
+
+interface HastNode {
+  type: string;
+  value?: string;
+  children?: HastNode[];
+}
+
+/** The plain text of a heading, as articleHeadings reads it from the source. */
+function textOf(node: HastNode | undefined): string {
+  if (!node) return "";
+  if (node.type === "text") return node.value ?? "";
+  return (node.children ?? []).map(textOf).join("");
+}
 
 // Only pictures uploaded through the Studio are shown. A picture address
 // pointing anywhere else is dropped, so an article cannot load from, or
@@ -11,13 +25,19 @@ const OWN_PICTURE = /^\/api\/journal\/media\/[0-9a-f-]{36}$/i;
  * links to other sites open in a new tab.
  */
 export default function Markdown({ children }: { children: string }) {
+  // Headings get addresses so the contents list can link to them.
+  const seen = new Map<string, number>();
+  const heading = (node: HastNode | undefined, text: React.ReactNode) => (
+    <h2 id={uniqueHeadingId(textOf(node).trim(), seen)}>{text}</h2>
+  );
   return (
     <div className="journal-prose">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
           // The page already has an h1: the article's title.
-          h1: ({ children: text }) => <h2>{text}</h2>,
+          h1: ({ node, children: text }) => heading(node, text),
+          h2: ({ node, children: text }) => heading(node, text),
           a: ({ href, children: text }) => {
             const outside = /^https?:\/\//.test(href ?? "");
             return (

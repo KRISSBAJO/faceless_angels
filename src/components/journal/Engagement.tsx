@@ -80,12 +80,23 @@ export default function Engagement({ article }: { article: Article }) {
 
   return (
     <section
-      aria-label="Respond to this article"
-      className="flex flex-col gap-6 border-t border-line pt-8"
+      aria-labelledby="respond-title"
+      className="flex flex-col gap-6 rounded-2xl border border-line bg-surface p-6 sm:p-8"
     >
       <div ref={end} />
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-col gap-1">
+        <h2 id="respond-title" className="font-serif text-2xl">
+          Did this speak to you?
+        </h2>
+        <p className="text-sm text-muted">
+          {signedIn
+            ? "Let the writer know, save it for later, or keep a note."
+            : "Readers who join can respond, save articles, and keep notes."}
+        </p>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
         {Object.entries(REACTION_LABELS).map(([kind, label]) =>
           signedIn ? (
             <button
@@ -93,14 +104,14 @@ export default function Engagement({ article }: { article: Article }) {
               type="button"
               aria-pressed={mine.includes(kind)}
               onClick={() => void react(kind)}
-              className={`btn px-4 py-2 text-sm ${
+              className={`rounded-full border px-4 py-2 text-sm transition-colors ${
                 mine.includes(kind)
-                  ? "border-transparent bg-verified-soft text-verified"
-                  : "btn-ghost"
+                  ? "border-transparent bg-verified-soft font-medium text-verified"
+                  : "border-line hover:border-ink"
               }`}
             >
               {label}
-              <span className="ml-2 tabular-nums text-muted">
+              <span className="ml-2 tabular-nums opacity-70">
                 {counts[kind] ?? 0}
               </span>
             </button>
@@ -122,30 +133,19 @@ export default function Engagement({ article }: { article: Article }) {
             type="button"
             aria-pressed={saved}
             onClick={() => void toggleSaved()}
-            className="underline underline-offset-4"
+            className={`btn px-4 py-2 text-sm ${saved ? "btn-ghost" : "btn-primary"}`}
           >
             {saved ? "✓ Saved to your library" : "Save for later"}
           </button>
         ) : (
-          <Link
-            href={`/sign-up?next=${next}`}
-            className="underline underline-offset-4"
-          >
-            Join to react, save, and keep notes
+          <Link href={`/sign-up?next=${next}`} className="btn btn-primary px-4 py-2 text-sm">
+            Join to respond
           </Link>
         )}
         {signedIn && finished ? (
-          <span className="text-muted">You have read this.</span>
+          <span className="text-muted">✓ You have read this</span>
         ) : null}
       </div>
-
-      <ShareBar
-        path={`/journal/${article.slug}`}
-        title={article.title}
-        summary={article.summary}
-        articleId={article.id}
-        label="Share this article"
-      />
 
       {message ? (
         <p role="alert" className="text-sm">
@@ -156,7 +156,7 @@ export default function Engagement({ article }: { article: Article }) {
       {signedIn ? (
         <form
           onSubmit={saveNote}
-          className="flex flex-col gap-3 rounded-xl border border-line bg-surface p-5"
+          className="flex flex-col gap-3 border-t border-line pt-6"
         >
           <Field
             id="note"
@@ -166,7 +166,7 @@ export default function Engagement({ article }: { article: Article }) {
             <textarea
               id="note"
               className="input"
-              rows={4}
+              rows={3}
               maxLength={5000}
               value={note}
               onChange={(event) => {
@@ -191,6 +191,16 @@ export default function Engagement({ article }: { article: Article }) {
           </div>
         </form>
       ) : null}
+
+      <div className="border-t border-line pt-5">
+        <ShareBar
+          path={`/journal/${article.slug}`}
+          title={article.title}
+          summary={article.summary}
+          articleId={article.id}
+          label="Share this article"
+        />
+      </div>
     </section>
   );
 }

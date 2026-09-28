@@ -43,24 +43,39 @@ function VerifyEmailBanner({ user }: { user: User }) {
 export default function AppShell({
   user,
   visitorNav = false,
+  wide = false,
   children,
 }: {
   user?: User | null;
   /** Show the public links when nobody is signed in. */
   visitorNav?: boolean;
+  /** Room for side columns, as on an article. */
+  wide?: boolean;
   children: React.ReactNode;
 }) {
   return (
     <>
-      <SiteHeader user={user} showNav={Boolean(user) || visitorNav} />
+      <SiteHeader
+        user={user}
+        showNav={Boolean(user) || visitorNav}
+        wide={wide}
+      />
       {user && !user.emailVerified && !user.mustChangePassword ? (
         <VerifyEmailBanner user={user} />
       ) : null}
-      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-5 py-12">
+      <main
+        className={`mx-auto flex w-full flex-1 flex-col gap-8 px-5 py-12 ${
+          wide ? "max-w-6xl" : "max-w-5xl"
+        }`}
+      >
         {children}
       </main>
       <footer className="border-t border-line">
-        <p className="mx-auto w-full max-w-5xl px-5 py-6 text-sm text-muted">
+        <p
+          className={`mx-auto w-full px-5 py-6 text-sm text-muted ${
+            wide ? "max-w-6xl" : "max-w-5xl"
+          }`}
+        >
           Faceless Angels is not an emergency service. If you are in immediate
           danger, call 911.
         </p>

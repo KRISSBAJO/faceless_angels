@@ -250,3 +250,47 @@ export function formatDate(iso: string) {
 export function minutes(n: number) {
   return n === 1 ? "1 minute" : `${n} minutes`;
 }
+
+/** The address of a heading inside an article, like "why-it-matters". */
+export function headingId(text: string) {
+  return (
+    text
+      .toLowerCase()
+      .normalize("NFKD")
+      .replace(/[̀-ͯ]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 60) || "section"
+  );
+}
+
+/**
+ * The article's sections, for the contents list. Level-one and level-two
+ * headings both show as sections, since the title is the page's only h1.
+ * Repeated headings get -2, -3, in the order Markdown renders them.
+ */
+export function articleHeadings(body: string) {
+  const seen = new Map<string, number>();
+  const headings: { id: string; text: string }[] = [];
+  let fenced = false;
+  for (const line of body.split(/\r?\n/)) {
+    if (/^\s*(```|~~~)/.test(line)) fenced = !fenced;
+    const match = fenced ? null : /^#{1,2}\s+(.+?)\s*#*\s*$/.exec(line);
+    if (!match) continue;
+    const text = match[1]
+      .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
+      .replace(/[*_`~]/g, "")
+      .trim();
+    if (!text) continue;
+    headings.push({ id: uniqueHeadingId(text, seen), text });
+  }
+  return headings;
+}
+
+/** headingId, made unique within one article by counting repeats. */
+export function uniqueHeadingId(text: string, seen: Map<string, number>) {
+  const base = headingId(text);
+  const count = (seen.get(base) ?? 0) + 1;
+  seen.set(base, count);
+  return count === 1 ? base : `${base}-${count}`;
+}
