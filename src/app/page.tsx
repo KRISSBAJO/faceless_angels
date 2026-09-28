@@ -6,26 +6,28 @@ import JournalHome from "@/components/JournalHome";
 import OpenNeeds from "@/components/OpenNeeds";
 import PrayerHome from "@/components/PrayerHome";
 
+// Giving is not open yet: Angels pledge, and no money moves. Keep these
+// words true to what the site does today.
 const steps = [
   {
     title: "Ask in private",
     body: "Tell us what happened, what is owed, and when it is due. Upload the bill or notice. None of this is shown to the public.",
   },
   {
-    title: "We verify the person and the need",
+    title: "We check the person and the need",
     body: "We confirm your identity and check the document. For larger amounts we confirm the balance with the provider.",
   },
   {
     title: "A reviewer decides",
-    body: "A trained person approves the amount and explains the decision in plain words. A second person authorizes the payment.",
+    body: "A trained person approves the amount and explains the decision in plain words. You can appeal.",
   },
   {
-    title: "An Angel pays the provider",
-    body: "Angels fund the approved amount. We recheck the balance, then the money goes to the utility, landlord, or school.",
+    title: "Angels pledge",
+    body: "The need is listed without your name. Angels pledge toward it, and never learn who you are.",
   },
   {
-    title: "Proof, then follow-up",
-    body: "The receipt is filed with the case. We ask if you want help getting beyond the situation.",
+    title: "The provider is paid",
+    body: "When giving opens, the money goes straight to the utility, landlord, or school, and the receipt is filed with the case.",
   },
 ];
 
@@ -40,19 +42,19 @@ const destinations: [string, string][] = [
 const safeguards = [
   {
     title: "One person, one account",
-    body: "Identity is verified privately, which makes duplicate accounts hard to run.",
+    body: "Identity is checked privately, which makes duplicate accounts hard to run.",
   },
   {
     title: "Documents are checked",
-    body: "Old, altered, or reused bills are sent to a moderator before anything is published.",
+    body: "Old, altered, or reused bills go to a moderator before anything is published.",
   },
   {
     title: "Review scales with the risk",
-    body: "A small grocery request gets a light check. Rent, repeat requests, and cash exceptions get a senior reviewer.",
+    body: "A small grocery request gets a light check. Rent and repeat requests get a senior reviewer.",
   },
   {
-    title: "Two people release every payment",
-    body: "The person who reviews a case cannot pay it out alone. Every step is logged.",
+    title: "No one decides alone",
+    body: "Reviewers cannot approve their own requests, and every step is logged.",
   },
   {
     title: "People decide, and decisions can be appealed",
@@ -79,37 +81,6 @@ const levels = [
   },
 ];
 
-const areas = [
-  {
-    name: "Prayer Groups",
-    body: "A network of groups that pray each week, online and in person, led by named leaders.",
-  },
-  {
-    name: "Prayer Requests",
-    body: "Ask for prayer in private, in your group, or across the network. Prayer is always optional.",
-  },
-  {
-    name: "Ask for Help",
-    body: "Food, rent, utilities, transportation, school supplies, and emergencies.",
-  },
-  {
-    name: "Be an Angel",
-    body: "Browse approved needs and pledge toward one without your name attached.",
-  },
-  {
-    name: "Nominate Someone",
-    body: "Tell us about a neighbor in need. We check the situation and ask their consent before opening a mission.",
-  },
-  {
-    name: "Angel Missions",
-    body: "Churches and groups organize help around a specific need.",
-  },
-  {
-    name: "Journal",
-    body: "Devotionals, Bible study, and true stories. Read, comment, save, and keep your own notes.",
-  },
-];
-
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gold">
@@ -117,6 +88,34 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
     </p>
   );
 }
+
+const FOOTER_LINKS: [string, [string, string][]][] = [
+  [
+    "Take part",
+    [
+      ["/prayer", "Prayer"],
+      ["/prayer/groups", "Prayer groups"],
+      ["/needs", "Open needs"],
+      ["/ask", "Ask for help"],
+    ],
+  ],
+  [
+    "Read",
+    [
+      ["/journal", "Journal"],
+      ["/journal/articles", "All articles"],
+      ["/journal/feed.xml", "Journal feed"],
+    ],
+  ],
+  [
+    "How it works",
+    [
+      ["/#how", "How giving works"],
+      ["/#safeguards", "Safeguards"],
+      ["/#privacy", "Privacy"],
+    ],
+  ],
+];
 
 export default function Home() {
   return (
@@ -151,7 +150,7 @@ export default function Home() {
                 href="/needs"
                 className="rounded-full border border-ink px-6 py-3 font-medium transition-colors hover:bg-ink hover:text-paper"
               >
-                Become an Angel
+                See open needs
               </Link>
             </div>
           </div>
@@ -196,14 +195,8 @@ export default function Home() {
           </article>
         </section>
 
-        <PrayerHome />
-
-        <OpenNeeds />
-
-        <JournalHome />
-
         {/* Scripture */}
-        <section className="border-b border-line">
+        <section className="border-t border-line">
           <figure className="mx-auto flex w-full max-w-3xl flex-col gap-3 px-5 py-12 text-center">
             <blockquote className="font-serif text-xl italic leading-relaxed sm:text-2xl">
               But when thou doest alms, let not thy left hand know what thy
@@ -215,7 +208,13 @@ export default function Home() {
           </figure>
         </section>
 
-        {/* How it works */}
+        <PrayerHome />
+
+        <OpenNeeds />
+
+        <JournalHome />
+
+        {/* How giving works */}
         <section
           id="how"
           className="mx-auto flex w-full max-w-6xl scroll-mt-8 flex-col gap-10 px-5 py-16"
@@ -230,6 +229,10 @@ export default function Home() {
                 The person you help never learns your name. Every gift is
                 still recorded, checked, and accounted for.
               </p>
+              <p className="max-w-[32rem] rounded-lg border border-line bg-surface px-4 py-3 text-sm leading-6">
+                Giving is not open yet. For now, Angels pledge: a promise to
+                give. No money is taken, and we will write when giving opens.
+              </p>
             </div>
             <article
               aria-label="Example help request"
@@ -237,15 +240,15 @@ export default function Home() {
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="font-mono text-xs uppercase tracking-[0.1em] text-muted">
-                  Utility assistance · Nashville, TN
+                  School needs · Knoxville, TN
                 </p>
                 <span className="rounded-full bg-gold-soft px-2.5 py-1 text-xs font-medium text-gold">
                   Example request
                 </span>
               </div>
               <p className="font-serif text-2xl leading-snug">
-                Single-parent household requesting assistance with an electricity
-                bill.
+                School supplies for two children starting at a new school
+                after a move.
               </p>
               <p className="text-sm text-muted">
                 Requested by{" "}
@@ -256,34 +259,31 @@ export default function Home() {
                   ✓ Identity checked
                 </span>
                 <span className="rounded-full bg-verified-soft px-3 py-1">
-                  ✓ Bill reviewed
-                </span>
-                <span className="rounded-full bg-verified-soft px-3 py-1">
-                  ✓ Balance confirmed with provider
+                  ✓ School list reviewed
                 </span>
               </div>
               <div className="flex flex-col gap-2">
                 <div className="flex items-baseline justify-between gap-4 tabular-nums">
-                  <span className="font-serif text-4xl">$187.42</span>
+                  <span className="font-serif text-4xl">$96.50</span>
                   <span className="text-sm text-muted">needed</span>
                 </div>
                 <div
                   role="progressbar"
-                  aria-label="Amount funded"
+                  aria-label="Amount pledged"
                   aria-valuemin={0}
-                  aria-valuemax={187.42}
-                  aria-valuenow={120}
+                  aria-valuemax={96.5}
+                  aria-valuenow={40}
                   className="h-2 overflow-hidden rounded-full bg-line"
                 >
-                  <div className="h-full w-[64%] rounded-full bg-gold-bright" />
+                  <div className="h-full w-[41%] rounded-full bg-gold-bright" />
                 </div>
                 <div className="flex justify-between gap-4 text-sm tabular-nums text-muted">
-                  <span>$120.00 funded</span>
-                  <span>$67.42 remaining</span>
+                  <span>$40.00 pledged</span>
+                  <span>$56.50 still needed</span>
                 </div>
               </div>
               <p className="border-t border-line pt-4 text-sm text-muted">
-                Paid directly to the utility provider. Due Friday.
+                To be paid directly to the school supplier.
               </p>
             </article>
           </div>
@@ -305,148 +305,106 @@ export default function Home() {
           </ol>
         </section>
 
-        {/* Two views */}
-        <section className="bg-night text-night-ink">
-          <div className="mx-auto grid w-full max-w-6xl gap-12 px-5 py-16 lg:grid-cols-[1fr_1.15fr] lg:items-center">
-            <div className="flex flex-col gap-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gold-bright">
-                Privacy with accountability
-              </p>
-              <h2 className="font-serif text-3xl leading-tight sm:text-4xl">
-                The Angel may be faceless. The transaction never is.
-              </h2>
-              <p className="max-w-[32rem] leading-7 text-night-muted">
-                The helper stays hidden from the recipient, but nobody is
-                hidden from the platform. We know who gave, who received, what
-                was paid, and when. Switch between the two views of the same
-                gift.
-              </p>
-            </div>
-            <CaseViews />
-          </div>
-        </section>
-
-        {/* Safeguards */}
+        {/* How we keep it safe: privacy, safeguards, and who is paid */}
         <section
           id="safeguards"
-          className="mx-auto grid w-full max-w-6xl scroll-mt-8 gap-14 px-5 py-16 lg:grid-cols-2"
-        >
-          <div className="flex flex-col gap-6">
-            <Eyebrow>Safeguards</Eyebrow>
-            <h2 className="font-serif text-3xl leading-tight sm:text-4xl">
-              We pay the need, not the applicant
-            </h2>
-            <p className="max-w-[34rem] leading-7 text-muted">
-              Cash is the exception. When a bill is confirmed, the gift goes
-              straight to whoever is owed. Each badge names the exact check
-              we completed, so you know what was confirmed and what was not.
-            </p>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b border-ink text-xs uppercase tracking-[0.1em] text-muted">
-                    <th className="py-3 pr-6 font-semibold">The need</th>
-                    <th className="py-3 font-semibold">Who is paid</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {destinations.map(([need, payee]) => (
-                    <tr key={need} className="border-b border-line">
-                      <td className="py-3 pr-6 font-medium">{need}</td>
-                      <td className="py-3 text-muted">{payee}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <ul className="flex flex-col">
-            {safeguards.map((item) => (
-              <li
-                key={item.title}
-                className="flex flex-col gap-1.5 border-b border-line py-5 first:pt-0 last:border-b-0"
-              >
-                <h3 className="font-medium">{item.title}</h3>
-                <p className="text-sm leading-6 text-muted">{item.body}</p>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        {/* Privacy levels */}
-        <section
-          id="privacy"
           className="scroll-mt-8 border-y border-line bg-surface"
         >
-          <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-5 py-16">
-            <div className="flex max-w-2xl flex-col gap-4">
-              <Eyebrow>Privacy</Eyebrow>
-              <h2 className="font-serif text-3xl leading-tight sm:text-4xl">
-                You choose how much of yourself is seen
-              </h2>
-              <p className="leading-7 text-muted">
-                At every level, administrators keep an identity trail that can
-                be audited.
-              </p>
+          <div className="mx-auto flex w-full max-w-6xl flex-col gap-14 px-5 py-16">
+            <div className="grid gap-12 lg:grid-cols-[1fr_1.15fr] lg:items-center">
+              <div className="flex flex-col gap-5">
+                <Eyebrow>How we keep it safe</Eyebrow>
+                <h2 className="font-serif text-3xl leading-tight sm:text-4xl">
+                  The Angel may be faceless. The transaction never is.
+                </h2>
+                <p className="max-w-[32rem] leading-7 text-muted">
+                  The helper stays hidden from the recipient, but nobody is
+                  hidden from the platform. We know who gave, who received,
+                  what was paid, and when. Switch between the two views of the
+                  same gift.
+                </p>
+              </div>
+              <CaseViews />
             </div>
-            <div className="grid gap-10 lg:grid-cols-[1.4fr_1fr] lg:items-start">
-              <dl className="grid gap-x-10 gap-y-8 sm:grid-cols-2">
-                {levels.map((level) => (
-                  <div key={level.name} className="flex flex-col gap-2">
-                    <dt className="font-serif text-xl">{level.name}</dt>
-                    <dd className="text-sm leading-6 text-muted">
-                      {level.body}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-              <article
-                aria-label="Example Angel profile"
-                className="flex flex-col gap-4 rounded-2xl border border-line bg-paper p-6"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="font-mono text-sm">Faceless Angel #FA-7281</p>
-                  <span className="rounded-full bg-gold-soft px-2.5 py-1 text-xs font-medium text-gold">
-                    Example profile
-                  </span>
-                </div>
-                <dl className="flex flex-col text-sm tabular-nums">
-                  <div className="flex justify-between gap-4 border-b border-line py-2.5">
-                    <dt className="text-muted">People helped</dt>
-                    <dd className="font-medium">18</dd>
-                  </div>
-                  <div className="flex justify-between gap-4 border-b border-line py-2.5">
-                    <dt className="text-muted">Verified needs fulfilled</dt>
-                    <dd className="font-medium">$2,840</dd>
-                  </div>
-                  <div className="flex justify-between gap-4 py-2.5">
-                    <dt className="text-muted">Member since</dt>
-                    <dd className="font-medium">2026</dd>
-                  </div>
-                </dl>
-                <p className="text-sm font-medium text-verified">
-                  ✓ Identity checked
-                </p>
+
+            <div className="grid gap-12 border-t border-line pt-12 lg:grid-cols-3">
+              <div className="flex flex-col gap-4">
+                <h3 className="font-serif text-2xl">
+                  We pay the need, not the applicant
+                </h3>
                 <p className="text-sm leading-6 text-muted">
-                  No name and no leaderboard. Giving here is not a contest.
+                  Cash is the exception. The gift goes straight to whoever is
+                  owed.
                 </p>
-              </article>
+                <dl className="flex flex-col text-sm">
+                  {destinations.map(([need, payee]) => (
+                    <div
+                      key={need}
+                      className="flex justify-between gap-4 border-b border-line py-2.5 last:border-b-0"
+                    >
+                      <dt className="font-medium">{need}</dt>
+                      <dd className="text-right text-muted">{payee}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+
+              <div className="flex flex-col gap-4">
+                <h3 className="font-serif text-2xl">Checks at every step</h3>
+                <ul className="flex flex-col">
+                  {safeguards.map((item) => (
+                    <li
+                      key={item.title}
+                      className="flex flex-col gap-1 border-b border-line py-3 first:pt-0 last:border-b-0"
+                    >
+                      <span className="text-sm font-medium">{item.title}</span>
+                      <span className="text-sm leading-6 text-muted">
+                        {item.body}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div id="privacy" className="flex scroll-mt-8 flex-col gap-4">
+                <h3 className="font-serif text-2xl">
+                  You choose how much is seen
+                </h3>
+                <dl className="flex flex-col">
+                  {levels.map((level) => (
+                    <div
+                      key={level.name}
+                      className="flex flex-col gap-1 border-b border-line py-3 first:pt-0 last:border-b-0"
+                    >
+                      <dt className="text-sm font-medium">{level.name}</dt>
+                      <dd className="text-sm leading-6 text-muted">
+                        {level.body}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+                <p className="text-sm leading-6 text-muted">
+                  At every level, administrators keep an identity trail that
+                  can be audited. No leaderboard: giving here is not a
+                  contest.
+                </p>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Community */}
+        {/* Closing */}
         <section
           id="community"
           className="mx-auto flex w-full max-w-6xl scroll-mt-8 flex-col gap-10 px-5 py-16"
         >
           <div className="flex max-w-2xl flex-col gap-4">
-            <Eyebrow>Community</Eyebrow>
+            <Eyebrow>More than a place to give</Eyebrow>
             <h2 className="font-serif text-3xl leading-tight sm:text-4xl">
-              More than a place to give
+              Come as you are
             </h2>
             <p className="leading-7 text-muted">
-              After a bill is paid, we ask one more question: would you like
+              After a need is met, we ask one more question: would you like
               help getting beyond this? We can point you to work, budgeting,
               food, counseling, and a local church.
             </p>
@@ -455,64 +413,36 @@ export default function Home() {
               a testimony.
             </p>
           </div>
-          <ul className="grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
-            {areas.map((area) => (
-              <li
-                key={area.name}
-                className="flex flex-col gap-2 border-t border-line pt-5"
-              >
-                <h3 className="font-serif text-2xl">{area.name}</h3>
-                <p className="text-sm leading-6 text-muted">{area.body}</p>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        {/* Closing */}
-        <section id="start" className="scroll-mt-8 bg-night text-night-ink">
-          <div className="mx-auto grid w-full max-w-6xl gap-6 px-5 py-16 lg:grid-cols-3">
-            <div className="flex flex-col items-start gap-4 rounded-2xl border border-night-line p-7 sm:p-10">
-              <h2 className="font-serif text-2xl sm:text-3xl">
-                Pray with a group
-              </h2>
-              <p className="leading-7 text-night-muted">
+          <div id="start" className="grid scroll-mt-8 gap-6 lg:grid-cols-3">
+            <div className="flex flex-col items-start gap-4 rounded-2xl border border-line bg-surface p-7 sm:p-8">
+              <h3 className="font-serif text-2xl">Pray with a group</h3>
+              <p className="leading-7 text-muted">
                 Find a group that prays each week, or start one for your
                 church, your street, or your family.
               </p>
-              <Link
-                href="/prayer"
-                className="mt-auto rounded-full bg-gold-bright px-6 py-3 font-medium text-night transition-opacity hover:opacity-90"
-              >
+              <Link href="/prayer" className="btn btn-primary mt-auto">
                 Pray with us
               </Link>
             </div>
-            <div className="flex flex-col items-start gap-4 rounded-2xl border border-night-line p-7 sm:p-10">
-              <h2 className="font-serif text-2xl sm:text-3xl">
+            <div className="flex flex-col items-start gap-4 rounded-2xl border border-line bg-surface p-7 sm:p-8">
+              <h3 className="font-serif text-2xl">
                 Become someone&apos;s Angel
-              </h2>
-              <p className="leading-7 text-night-muted">
-                Confirm your identity once. Then cover an approved need
-                whenever you are able, with no name attached.
+              </h3>
+              <p className="leading-7 text-muted">
+                Confirm your identity once. Then pledge toward an approved
+                need, with no name attached.
               </p>
-              <Link
-                href="/needs"
-                className="mt-auto rounded-full border border-night-ink px-6 py-3 font-medium transition-colors hover:bg-night-ink hover:text-night"
-              >
+              <Link href="/needs" className="btn btn-ghost mt-auto">
                 See open needs
               </Link>
             </div>
-            <div className="flex flex-col items-start gap-4 rounded-2xl border border-night-line p-7 sm:p-10">
-              <h2 className="font-serif text-2xl sm:text-3xl">
-                Ask for help, or for a neighbor
-              </h2>
-              <p className="leading-7 text-night-muted">
-                Your request is reviewed in private. Donors see the situation,
-                never your name.
+            <div className="flex flex-col items-start gap-4 rounded-2xl border border-line bg-surface p-7 sm:p-8">
+              <h3 className="font-serif text-2xl">Ask for help</h3>
+              <p className="leading-7 text-muted">
+                Your request is reviewed in private. Donors see the
+                situation, never your name.
               </p>
-              <Link
-                href="/ask"
-                className="mt-auto rounded-full border border-night-ink px-6 py-3 font-medium transition-colors hover:bg-night-ink hover:text-night"
-              >
+              <Link href="/ask" className="btn btn-ghost mt-auto">
                 Ask for help
               </Link>
             </div>
@@ -520,18 +450,38 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="border-t border-line">
-        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 px-5 py-8 text-sm text-muted">
-          <div className="flex items-center gap-2.5 text-ink">
-            <Mark />
-            <span className="font-serif text-lg">Faceless Angels</span>
+      <footer className="border-t border-line bg-surface">
+        <div className="mx-auto grid w-full max-w-6xl gap-10 px-5 py-12 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2.5">
+              <Mark />
+              <span className="font-serif text-lg">Faceless Angels</span>
+            </div>
+            <p className="text-sm text-muted">
+              Pray together. Help quietly. Love openly.
+            </p>
           </div>
-          <p>Pray together. Help quietly. Love openly.</p>
-          <p className="basis-full">
-            Faceless Angels is not an emergency service. If you are in
-            immediate danger, call 911.
-          </p>
+          {FOOTER_LINKS.map(([heading, links]) => (
+            <nav key={heading} aria-label={heading} className="flex flex-col gap-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">
+                {heading}
+              </p>
+              <ul className="flex flex-col gap-2 text-sm">
+                {links.map(([href, label]) => (
+                  <li key={href}>
+                    <Link href={href} className="hover:underline hover:underline-offset-4">
+                      {label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          ))}
         </div>
+        <p className="mx-auto w-full max-w-6xl border-t border-line px-5 py-5 text-sm text-muted">
+          Faceless Angels is not an emergency service. If you are in immediate
+          danger, call 911.
+        </p>
       </footer>
     </>
   );

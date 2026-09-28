@@ -19,7 +19,7 @@ const ABOUT: Links = [
   ["/#how", "How giving works"],
   ["/#safeguards", "Safeguards"],
   ["/#privacy", "Privacy"],
-  ["/#community", "Everything we do"],
+  ["/#community", "Get involved"],
 ];
 
 /** A small drop-down in the header. Closes on Escape, a click away, or a choice. */

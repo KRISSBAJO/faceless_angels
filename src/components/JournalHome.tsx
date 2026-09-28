@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { minutes, type JournalHome as Home } from "@/lib/journal";
+import { mediaUrl, minutes, type JournalHome as Home } from "@/lib/journal";
 import { apiOrigin } from "@/lib/api-origin";
 
 const API_URL = apiOrigin();
@@ -37,6 +37,17 @@ export default async function JournalHome() {
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gold">
             From the Journal
           </p>
+          {home.featured.cover ? (
+            <Link href={`/journal/${home.featured.slug}`} tabIndex={-1} aria-hidden>
+              {/* Served by our own API from storage. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={mediaUrl(home.featured.cover.id)}
+                alt=""
+                className="aspect-[16/9] w-full rounded-xl object-cover"
+              />
+            </Link>
+          ) : null}
           <p className="font-mono text-xs uppercase tracking-[0.1em] text-muted">
             {home.featured.category.label}
           </p>
