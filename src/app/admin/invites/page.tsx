@@ -15,10 +15,10 @@ const ROLE_NOTES: Record<string, string> = {
   admin: "Manages people, invitations, need types, and wording.",
   payment_approver: "No screens yet. Will authorize payments.",
   editor:
-    "Approves what is shared on the prayer network. Will also publish the Journal.",
+    "Writes, reviews, and publishes the Journal, and moderates comments. Also approves what is shared on the prayer network.",
   prayer_team: "Reads requests sent to the prayer team, and prays.",
   pastor:
-    "Reads requests sent to the prayer team, approves what is shared, and approves new prayer groups.",
+    "Reads requests sent to the prayer team, approves what is shared, and approves new prayer groups. Can write and review for the Journal.",
   angel: "No screens yet. Will fund approved requests.",
   requester: "Asks for help. People can also sign up for this on their own.",
 };

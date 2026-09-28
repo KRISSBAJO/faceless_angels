@@ -135,6 +135,112 @@ h3 {
   }
 }
 
+/* Article text in the Journal. Plain selectors, because the text is rendered
+   from Markdown and carries no classes of its own. */
+.journal-prose {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.2rem;
+  line-height: 1.75;
+  overflow-wrap: break-word;
+}
+
+.journal-prose > * + * {
+  margin-top: 1.25em;
+}
+
+.journal-prose h2,
+.journal-prose h3,
+.journal-prose h4 {
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-top: 2em;
+}
+
+.journal-prose h2 {
+  font-size: 1.35rem;
+}
+
+.journal-prose h3,
+.journal-prose h4 {
+  font-size: 1.1rem;
+}
+
+.journal-prose a {
+  text-decoration: underline;
+  text-decoration-color: var(--gold-bright);
+  text-underline-offset: 0.2em;
+}
+
+.journal-prose ul,
+.journal-prose ol {
+  padding-left: 1.4em;
+}
+
+.journal-prose ul {
+  list-style: disc;
+}
+
+.journal-prose ol {
+  list-style: decimal;
+}
+
+.journal-prose li + li {
+  margin-top: 0.4em;
+}
+
+/* A block quote in an article is nearly always scripture. */
+.journal-prose blockquote {
+  border-left: 2px solid var(--gold-bright);
+  padding-left: 1.25em;
+  font-style: italic;
+}
+
+.journal-prose figure {
+  margin-block: 2em;
+}
+
+.journal-prose img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 0.75rem;
+}
+
+.journal-prose figcaption {
+  margin-top: 0.6em;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.journal-prose hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin-block: 2em;
+}
+
+.journal-prose code {
+  font-family: var(--font-data), monospace;
+  font-size: 0.85em;
+}
+
+.journal-prose table {
+  display: block;
+  overflow-x: auto;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 0.95rem;
+  border-collapse: collapse;
+}
+
+.journal-prose th,
+.journal-prose td {
+  border-bottom: 1px solid var(--line);
+  padding: 0.5em 1em 0.5em 0;
+  text-align: left;
+}
+
 /* The name a donor never sees. */
 .redacted {
   display: inline-block;

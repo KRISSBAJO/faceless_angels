@@ -15,6 +15,13 @@ import { CatalogService } from './catalog/catalog.service';
 import { DbService } from './db/db.service';
 import { IdentityController } from './identity/identity.controller';
 import { IdentityService } from './identity/identity.service';
+import {
+  JournalController,
+  JournalMemberController,
+  JournalStudioController,
+} from './journal/journal.controller';
+import { JournalReaderService } from './journal/reader.service';
+import { JournalStudioService } from './journal/studio.service';
 import { MailService } from './mail/mail.service';
 import { NeedsController } from './needs/needs.controller';
 import { NeedsService } from './needs/needs.service';
@@ -57,6 +64,9 @@ class HealthController {
     NeedsController,
     PrayerPublicController,
     PrayerController,
+    JournalStudioController,
+    JournalMemberController,
+    JournalController,
     AdminController,
   ],
   providers: [
@@ -77,6 +87,8 @@ class HealthController {
     PrayerSessionsService,
     PrayerTogetherService,
     PrayerModerationService,
+    JournalReaderService,
+    JournalStudioService,
     AdminService,
     SeedService,
     { provide: APP_GUARD, useClass: ThrottlerGuard },

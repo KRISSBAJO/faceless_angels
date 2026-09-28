@@ -1,17 +1,10 @@
 import Link from "next/link";
 import CaseViews from "@/components/CaseViews";
+import HomeHeader from "@/components/HomeHeader";
 import Mark from "@/components/Mark";
+import JournalHome from "@/components/JournalHome";
 import OpenNeeds from "@/components/OpenNeeds";
 import PrayerHome from "@/components/PrayerHome";
-
-const nav = [
-  { href: "/prayer", label: "Prayer" },
-  { href: "/needs", label: "Needs" },
-  { href: "#how", label: "How giving works" },
-  { href: "#safeguards", label: "Safeguards" },
-  { href: "#privacy", label: "Privacy" },
-  { href: "#community", label: "Community" },
-];
 
 const steps = [
   {
@@ -113,7 +106,7 @@ const areas = [
   },
   {
     name: "Journal",
-    body: "Devotionals, Bible study, family, finances, and stories from people who were helped.",
+    body: "Devotionals, Bible study, and true stories. Read, comment, save, and keep your own notes.",
   },
 ];
 
@@ -128,36 +121,7 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 export default function Home() {
   return (
     <>
-      <header className="border-b border-line">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-6 px-5 py-4">
-          <a href="#" className="flex items-center gap-2.5">
-            <Mark />
-            <span className="font-serif text-xl">Faceless Angels</span>
-          </a>
-          <nav aria-label="Main" className="hidden gap-7 text-sm md:flex">
-            {nav.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className="text-muted transition-colors hover:text-ink"
-              >
-                {item.label}
-              </a>
-            ))}
-          </nav>
-          <div className="flex items-center gap-5 text-sm">
-            <Link href="/sign-in" className="text-muted hover:text-ink">
-              Sign in
-            </Link>
-            <Link
-              href="/ask"
-              className="rounded-full bg-ink px-4 py-2 font-medium text-paper transition-opacity hover:opacity-90"
-            >
-              Ask for help
-            </Link>
-          </div>
-        </div>
-      </header>
+      <HomeHeader />
 
       <main className="flex flex-col">
         {/* Hero */}
@@ -235,6 +199,8 @@ export default function Home() {
         <PrayerHome />
 
         <OpenNeeds />
+
+        <JournalHome />
 
         {/* Scripture */}
         <section className="border-b border-line">

@@ -40,6 +40,19 @@ export function sniffMimeType(bytes: Buffer): string | null {
   return null;
 }
 
+/** Like sniffMimeType, for pictures shown on the site. */
+export function sniffImageType(bytes: Buffer): string | null {
+  const type = sniffMimeType(bytes);
+  if (type === 'image/jpeg' || type === 'image/png') return type;
+  if (
+    bytes.subarray(0, 4).toString('latin1') === 'RIFF' &&
+    bytes.subarray(8, 12).toString('latin1') === 'WEBP'
+  ) {
+    return 'image/webp';
+  }
+  return null;
+}
+
 /**
  * Holds bills and identity papers. Every file is encrypted here before it
  * leaves the process, so the bucket or disk only ever sees ciphertext.
@@ -68,25 +81,34 @@ export class VaultService implements OnModuleInit {
     }
   }
 
-  async put(folder: string, bytes: Buffer): Promise<StoredFile> {
+  /**
+   * Stores a file. Private files, the default, are encrypted first.
+   * Pass `published` only for things meant for everyone, like a cover image.
+   */
+  async put(
+    folder: string,
+    bytes: Buffer,
+    options: { published?: boolean } = {},
+  ): Promise<StoredFile> {
     const key = `${folder}/${randomUUID()}.bin`;
-    const sealed = this.seal(bytes);
+    const encryption = options.published ? null : SCHEME;
+    const body = options.published ? bytes : this.seal(bytes);
     if (this.s3) {
       await this.s3.send(
         new PutObjectCommand({
           Bucket: config.storage.bucket,
           Key: key,
-          Body: sealed,
+          Body: body,
           ContentType: 'application/octet-stream',
           ServerSideEncryption: 'AES256',
         }),
       );
-      return { storage: 's3', key, encryption: SCHEME };
+      return { storage: 's3', key, encryption };
     }
     const path = join(config.storage.localDir, key);
     await mkdir(dirname(path), { recursive: true });
-    await writeFile(path, sealed, { flag: 'wx' });
-    return { storage: 'local', key, encryption: SCHEME };
+    await writeFile(path, body, { flag: 'wx' });
+    return { storage: 'local', key, encryption };
   }
 
   async get(file: StoredFile): Promise<Buffer> {

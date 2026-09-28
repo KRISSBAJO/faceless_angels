@@ -23,6 +23,9 @@ export const PRAYER_TEAM_ROLES: Role[] = ['prayer_team', 'pastor', 'admin'];
 /** Roles that approve what appears in public and approve new groups. */
 export const PRAYER_MODERATOR_ROLES: Role[] = ['pastor', 'editor', 'admin'];
 
+/** Roles that write, review, and moderate the Journal. */
+export const JOURNAL_STAFF_ROLES: Role[] = ['editor', 'pastor', 'admin'];
+
 /** Roles that may open cases and identity papers. */
 export const REVIEW_ROLES: Role[] = ['reviewer', 'senior_reviewer', 'admin'];
 

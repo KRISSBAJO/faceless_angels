@@ -28,6 +28,7 @@ export function homeFor(user: User) {
   if (user.role === "prayer_team" || user.role === "pastor") {
     return "/prayer/team";
   }
+  if (user.role === "editor") return "/journal/studio";
   return "/requests";
 }
 

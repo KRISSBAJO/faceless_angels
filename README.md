@@ -60,6 +60,10 @@ Staff cannot sign themselves up. An administrator invites them from
 - Live prayer sessions on Patvero, Zoom, or Teams, or in person
 - Prayer campaigns over a set number of days, and prayer chains taken in turns
 - A prayer team inbox and a moderation queue
+- The Journal: articles, series, search, comments, saved articles, and
+  private notes, with email when a followed category has something new
+- The Studio: a writing editor with review by a second person, scheduling,
+  versions, corrections, and numbers for each article
 - Admin: people, invitations, need types and limits, agreement wording, audit log
 
 ## What is not built
@@ -91,6 +95,9 @@ does not yet.
 - A report about a member or a group goes to site moderators, never to that
   group's own admins. The person reported is not told who sent it.
 - Prayer has no part in who receives help. Prayer roles cannot open cases.
+- An article is published after a second person approves it. An
+  administrator may publish their own, and that is recorded.
+- A reader's private notes on an article are never shown to staff.
 - Emails to reserved test domains such as `example.test` are never sent.
 
 Back up `EVIDENCE_ENCRYPTION_KEY`. Without it, stored documents cannot be read.
