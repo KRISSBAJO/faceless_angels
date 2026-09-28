@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // The API is a separate package with its own build.
+    "api/**",
   ]),
 ]);
 
