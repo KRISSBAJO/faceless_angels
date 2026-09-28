@@ -1,3 +1,4 @@
+import { PatveroService } from './patvero/patvero.service';
 import { Controller, Get, Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
@@ -94,6 +95,7 @@ class HealthController {
     WordImportService,
     BibleService,
     AdminService,
+    PatveroService,
     SeedService,
     { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],

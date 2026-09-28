@@ -10,6 +10,7 @@ const TABS: { href: string; label: string; adminOnly: boolean }[] = [
   { href: "/admin/people", label: "People", adminOnly: true },
   { href: "/admin/invites", label: "Invitations", adminOnly: true },
   { href: "/admin/settings", label: "Need types and wording", adminOnly: true },
+  { href: "/admin/connections", label: "Connections", adminOnly: true },
   { href: "/admin/audit", label: "Audit log", adminOnly: false },
 ];
 

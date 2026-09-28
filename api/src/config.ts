@@ -54,6 +54,15 @@ export const config = {
     localDir: env('EVIDENCE_DIR') || './data/evidence',
     encryptionKey: env('EVIDENCE_ENCRYPTION_KEY'),
   },
+  patvero: {
+    // PATVERO_API_URL was this setting's earlier name.
+    baseUrl: (
+      env('PATVERO_API_BASE_URL') ||
+      env('PATVERO_API_URL') ||
+      'https://api.patvero.com/api/v1'
+    ).replace(/\/$/, ''),
+    apiKey: env('PATVERO_API_KEY'),
+  },
   seed: {
     email: env('SEED_OWNER_EMAIL').toLowerCase(),
     password: env('SEED_OWNER_PASSWORD'),

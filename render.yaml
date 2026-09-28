@@ -64,8 +64,11 @@ services:
         sync: false
       - key: RELYKIT_API_KEY
         sync: false
-      - key: PATVERO_API_URL
+      - key: PATVERO_API_BASE_URL
         value: https://api.patvero.com/api/v1
+      # A read-only key made for this app alone. Never shared with the website.
+      - key: PATVERO_API_KEY
+        sync: false
       # The first administrator. They must choose a new password at first sign-in.
       - key: SEED_OWNER_EMAIL
         sync: false

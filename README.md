@@ -68,6 +68,11 @@ The website passes `/api` calls to the API over Render's private network
      separate bucket from the one used on this computer.
    - `MAIL_FROM` and `RELYKIT_API_KEY`.
    - `SEED_OWNER_EMAIL` and `SEED_OWNER_PASSWORD` for the first administrator.
+   - `PATVERO_API_KEY`, optional: a read-only key made for Faceless Angels
+     alone in Patvero (Workspace → Developer API, scopes `workspace.read`
+     and `meetings.read`). It stays on the API server. **Admin →
+     Connections** shows whether it works. Patvero keys expire, 90 days by
+     default, so make a new one before then.
 3. Once it is running, open the API's **Environment** page and copy
    `EVIDENCE_ENCRYPTION_KEY` somewhere safe. Render made it. Without it, the
    stored bills and IDs cannot be read.

@@ -1,4 +1,5 @@
 import { BadRequestException, Logger } from '@nestjs/common';
+import { config } from '../config';
 
 export interface CheckedLink {
   /** The link as it will be stored and handed to members. */
@@ -53,9 +54,7 @@ function wrongPlace(name: string) {
 
 const PATVERO_HOSTS = ['patvero.com', 'www.patvero.com'];
 const PATVERO_CODE = /^[a-z0-9_-]{4,32}$/;
-const PATVERO_API = (
-  process.env.PATVERO_API_URL?.trim() || 'https://api.patvero.com/api/v1'
-).replace(/\/$/, '');
+const PATVERO_API = config.patvero.baseUrl;
 
 function patveroCode(url: URL) {
   const fromPath = /^\/(?:room|video\/join)\/([^/]+)\/?$/.exec(url.pathname);

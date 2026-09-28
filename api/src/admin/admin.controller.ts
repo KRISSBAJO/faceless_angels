@@ -20,12 +20,66 @@ import {
   UpdateUserDto,
 } from './admin.dto';
 import { AdminService } from './admin.service';
+import {
+  PatveroError,
+  PatveroService,
+  type PatveroMeeting,
+  type PatveroProblem,
+} from '../patvero/patvero.service';
 
 @Controller('admin')
 @UseGuards(AuthGuard)
 @Roles('admin')
 export class AdminController {
-  constructor(private readonly admin: AdminService) {}
+  constructor(
+    private readonly admin: AdminService,
+    private readonly patvero: PatveroService,
+  ) {}
+
+  /**
+   * Whether the Patvero key works, and the workspace's coming meetings.
+   * Only facts about the connection are returned, never the key.
+   */
+  @Get('connections/patvero')
+  async patveroConnection() {
+    const problemOf = (err: unknown): PatveroProblem => {
+      if (err instanceof PatveroError) return err.problem;
+      throw err;
+    };
+    if (!this.patvero.configured) {
+      return { configured: false, problem: 'not_configured' as const };
+    }
+    let workspace;
+    try {
+      workspace = await this.patvero.workspace();
+    } catch (err) {
+      return { configured: true, problem: problemOf(err) };
+    }
+    let meetings: PatveroMeeting[] | null = null;
+    let meetingsProblem: PatveroProblem | null = null;
+    try {
+      const soon = Date.now() - 60 * 60 * 1000;
+      meetings = (await this.patvero.meetings())
+        .filter((m) => m.startsAt && Date.parse(m.startsAt) >= soon)
+        .filter((m) => !['cancelled', 'canceled', 'ended'].includes(m.status ?? ''))
+        .sort((a, b) => Date.parse(a.startsAt!) - Date.parse(b.startsAt!))
+        .slice(0, 10);
+    } catch (err) {
+      meetingsProblem = problemOf(err);
+    }
+    return {
+      configured: true,
+      problem: null,
+      workspace: {
+        name: workspace.name,
+        status: workspace.status,
+        keyName: workspace.keyName,
+        scopes: workspace.scopes,
+      },
+      meetings,
+      meetingsProblem,
+    };
+  }
 
   @Get('overview')
   @Roles('admin', 'auditor')
