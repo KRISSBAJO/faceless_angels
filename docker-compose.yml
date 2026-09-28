@@ -1,0 +1,40 @@
+name: faceless-angels
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: faceless
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: faceless
+    ports:
+      - "127.0.0.1:5442:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U faceless -d faceless"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build: ./api
+    # Email, storage, and owner-account settings come from .env.
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://faceless:${POSTGRES_PASSWORD}@db:5432/faceless
+      PORT: "4010"
+      EVIDENCE_DIR: /data/evidence
+      NODE_ENV: development
+      WEB_URL: ${WEB_URL:-http://localhost:3230}
+    ports:
+      - "127.0.0.1:4010:4010"
+    volumes:
+      - evidence-data:/data/evidence
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db-data:
+  evidence-data:
