@@ -79,22 +79,22 @@ export default function AdminShell({
 
   return (
     <AppShell user={user} wide>
-      <div className="grid min-w-0 gap-6 lg:grid-cols-[14rem_minmax(0,1fr)] lg:gap-10">
-        <aside className="hidden self-start rounded-2xl border border-line bg-surface p-4 lg:block">
-          <p className="mb-6 px-3 font-serif text-xl">Admin workspace</p>
+      <div className="grid min-w-0 gap-6 lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-8">
+        <aside className="sticky top-6 hidden self-start border-r border-line py-3 pr-5 lg:block">
+          <p className="mb-6 px-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted">Admin workspace</p>
           {navigation}
         </aside>
         <div className="min-w-0">
-          <details className="mb-7 rounded-xl border border-line bg-surface p-4 lg:hidden">
+          <details className="mb-6 rounded-xl border border-line bg-surface p-4 lg:hidden">
             <summary className="cursor-pointer font-medium">Admin sections · {title}</summary>
             <div className="mt-5 border-t border-line pt-5">{navigation}</div>
           </details>
-          <div className="mb-8 flex max-w-2xl flex-col gap-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">Admin workspace</p>
-            <h1 className="font-serif text-4xl sm:text-5xl">{title}</h1>
-            {intro ? <p className="leading-7 text-muted">{intro}</p> : null}
+          <div className="mb-6 border-b border-line pb-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">Faceless Angels / Admin</p>
+            <h1 className="mt-2 font-serif text-3xl sm:text-4xl">{title}</h1>
+            {intro ? <p className="mt-2 max-w-2xl text-sm leading-6 text-muted sm:text-base">{intro}</p> : null}
           </div>
-          <div className="flex min-w-0 flex-col gap-8">{children}</div>
+          <div className="flex min-w-0 flex-col gap-6">{children}</div>
         </div>
       </div>
     </AppShell>

@@ -9,67 +9,49 @@ import { STATE_LABELS } from "@/lib/format";
 import { ROLE_LABELS, useRequiredUser } from "@/lib/session";
 
 const MAIL_LABELS: Record<string, string> = {
-  relykit: "Sending through RelyKit",
-  smtp: "Sending through your SMTP server",
-  log: "Emails are only printed to the server log",
+  relykit: "RelyKit is sending email",
+  smtp: "SMTP is sending email",
+  log: "Email is going to the server log",
 };
 
-function Counts({
-  title,
-  counts,
-  labels,
-  href,
-}: {
-  title: string;
-  counts: Record<string, number>;
-  labels: Record<string, string>;
-  href?: string;
-}) {
+function QueueRow({ label, count, href, action }: { label: string; count: number; href?: string; action: string }) {
+  const content = (
+    <>
+      <span className="flex min-w-0 items-center gap-4">
+        <span className={`flex size-11 shrink-0 items-center justify-center rounded-xl text-lg font-semibold tabular-nums ${count ? "bg-gold-soft text-ink" : "bg-paper text-muted"}`}>{count}</span>
+        <span className="min-w-0">
+          <span className="block font-medium text-ink">{label}</span>
+          <span className="block text-sm text-muted">{count ? `${count} waiting` : "Nothing waiting"}</span>
+        </span>
+      </span>
+      <span className="shrink-0 text-sm font-medium text-gold group-hover:underline">{action}</span>
+    </>
+  );
+  const className = "group flex min-h-20 items-center justify-between gap-4 border-t border-line px-5 py-4 transition-colors hover:bg-paper sm:px-7";
+  return href ? <Link href={href} className={className}>{content}</Link> : <div className={className}>{content}</div>;
+}
+
+function Breakdown({ title, counts, labels, href }: { title: string; counts: Record<string, number>; labels: Record<string, string>; href?: string }) {
   const rows = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  const total = rows.reduce((sum, [, count]) => sum + count, 0);
   return (
-    <section className="rounded-2xl border border-line bg-surface p-5 sm:p-6">
-      <div className="mb-4 flex items-center justify-between gap-4">
-        <h2 className="font-serif text-2xl">{title}</h2>
-        {href ? <Link href={href} className="text-sm font-medium text-gold underline underline-offset-4">View all</Link> : null}
+    <section className="min-w-0 rounded-2xl border border-line bg-surface">
+      <div className="flex items-center justify-between gap-4 border-b border-line px-5 py-4 sm:px-6">
+        <div><h2 className="font-serif text-xl">{title}</h2><p className="mt-0.5 text-sm text-muted">{total} total</p></div>
+        {href ? <Link href={href} className="shrink-0 text-sm font-medium text-gold hover:underline">View all →</Link> : null}
       </div>
-      {rows.length === 0 ? (
-        <p className="text-sm text-muted">None yet.</p>
-      ) : (
-        <dl className="text-sm tabular-nums">
+      {rows.length ? (
+        <dl className="px-5 py-2 text-sm sm:px-6">
           {rows.map(([key, count]) => (
-            <div key={key} className="flex justify-between gap-6 border-t border-line py-3 first:border-t-0 first:pt-0 last:pb-0">
-              <dt className="text-muted">{labels[key] ?? key}</dt>
-              <dd className="font-semibold">{count}</dd>
+            <div key={key} className="flex items-center justify-between gap-4 py-2.5">
+              <dt className="min-w-0 text-muted">{labels[key] ?? key}</dt>
+              <dd className="font-semibold tabular-nums">{count}</dd>
             </div>
           ))}
         </dl>
-      )}
+      ) : <p className="px-5 py-5 text-sm text-muted sm:px-6">None yet.</p>}
     </section>
   );
-}
-
-function ActionCard({
-  label,
-  count,
-  href,
-  action,
-}: {
-  label: string;
-  count: number;
-  href?: string;
-  action?: string;
-}) {
-  const content = (
-    <>
-      <span className="text-sm font-medium text-muted">{label}</span>
-      <span className="text-4xl font-semibold tabular-nums">{count}</span>
-      <span className="text-sm font-medium text-gold group-hover:underline">
-        {action ?? "Waiting for the team"}
-      </span>
-    </>
-  );
-  const className = "group flex min-h-32 flex-col justify-between rounded-2xl border border-line bg-surface p-4 transition-colors hover:border-gold-bright sm:min-h-44 sm:p-5";
-  return href ? <Link href={href} className={className}>{content}</Link> : <div className={className}>{content}</div>;
 }
 
 export default function AdminOverviewPage() {
@@ -89,51 +71,31 @@ export default function AdminOverviewPage() {
   if (!user) return null;
 
   return (
-    <AdminShell user={user} title="Overview" intro="A quick view of the work waiting for your team and the people using Faceless Angels.">
+    <AdminShell user={user} title="Overview" intro="The work waiting for your team, with a clear path into each section.">
       <FormError message={error} />
       {!overview && !error ? <p className="text-sm text-muted">Loading overview…</p> : null}
       {overview ? (
         <>
-          <section aria-labelledby="attention-heading">
-            <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gold">Your priorities</p>
-                <h2 id="attention-heading" className="mt-1 font-serif text-2xl sm:text-3xl">Needs attention</h2>
-              </div>
-              <p className="text-sm text-muted">Open a section to take action</p>
+          <section aria-labelledby="attention-heading" className="overflow-hidden rounded-2xl border border-line bg-surface shadow-[0_12px_40px_-32px_rgba(20,33,61,0.5)]">
+            <div className="flex flex-wrap items-end justify-between gap-3 px-5 py-5 sm:px-7 sm:py-6">
+              <div><p className="text-xs font-semibold uppercase tracking-[0.14em] text-gold">Daily work</p><h2 id="attention-heading" className="mt-1 font-serif text-2xl sm:text-3xl">Needs attention</h2></div>
+              <span className="rounded-full border border-line px-3 py-1 text-xs font-medium text-muted">Current snapshot</span>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              <ActionCard label="Requests to review" count={overview.casesByState.submitted ?? 0} href={user.role === "admin" ? "/review" : undefined} action={user.role === "admin" ? "Open review queue →" : undefined} />
-              <ActionCard label="ID checks waiting" count={overview.pendingIdentityChecks} href={user.role === "admin" ? "/review/identity" : undefined} action={user.role === "admin" ? "Open ID checks →" : undefined} />
-              {user.role === "admin" ? (
-                <div className="sm:col-span-2 xl:col-span-1">
-                  <ActionCard label="Invitations pending" count={overview.pendingInvites} href="/admin/invites" action="View invitations →" />
-                </div>
-              ) : null}
-            </div>
+            <QueueRow label="Requests to review" count={overview.casesByState.submitted ?? 0} href={user.role === "admin" ? "/review" : undefined} action={user.role === "admin" ? "Review →" : "Team review"} />
+            <QueueRow label="Identity checks" count={overview.pendingIdentityChecks} href={user.role === "admin" ? "/review/identity" : undefined} action={user.role === "admin" ? "Open checks →" : "Team review"} />
+            {user.role === "admin" ? <QueueRow label="Invitations" count={overview.pendingInvites} href="/admin/invites" action="View invitations →" /> : null}
           </section>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <Counts title="People" counts={overview.usersByRole} labels={ROLE_LABELS} href={user.role === "admin" ? "/admin/people" : undefined} />
-            <Counts title="Requests" counts={overview.casesByState} labels={STATE_LABELS} href={user.role === "admin" ? "/review" : undefined} />
+            <Breakdown title="People" counts={overview.usersByRole} labels={ROLE_LABELS} href={user.role === "admin" ? "/admin/people" : undefined} />
+            <Breakdown title="Requests" counts={overview.casesByState} labels={STATE_LABELS} href={user.role === "admin" ? "/review" : undefined} />
           </div>
 
-          <section className="rounded-2xl border border-line bg-surface p-5 sm:p-6">
-            <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
-              <h2 className="font-serif text-2xl">Site setup</h2>
-              <span className="text-xs uppercase tracking-[0.12em] text-muted">Current configuration</span>
-            </div>
-            <dl className="grid gap-4 text-sm sm:grid-cols-2">
-              <div className="rounded-xl bg-paper p-4">
-                <dt className="font-semibold">Email</dt>
-                <dd className="mt-2 leading-6 text-muted">{MAIL_LABELS[overview.mailProvider] ?? overview.mailProvider}</dd>
-              </div>
-              <div className="rounded-xl bg-paper p-4">
-                <dt className="font-semibold">Documents</dt>
-                <dd className="mt-2 leading-6 text-muted">
-                  {overview.storage === "s3" ? "Encrypted and stored in your S3 bucket" : "Encrypted and stored on this server's disk"}
-                </dd>
-              </div>
+          <section aria-labelledby="setup-heading" className="rounded-2xl border border-line bg-surface px-5 py-5 sm:px-6">
+            <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2"><h2 id="setup-heading" className="font-serif text-xl">Site setup</h2><span className="text-xs uppercase tracking-[0.12em] text-muted">Current configuration</span></div>
+            <dl className="grid gap-3 text-sm sm:grid-cols-2">
+              <div className="border-t border-line pt-3"><dt className="font-medium">Email</dt><dd className="mt-1 text-muted">{MAIL_LABELS[overview.mailProvider] ?? overview.mailProvider}</dd></div>
+              <div className="border-t border-line pt-3"><dt className="font-medium">Documents</dt><dd className="mt-1 text-muted">{overview.storage === "s3" ? "Encrypted in your S3 bucket" : "Encrypted on this server"}</dd></div>
             </dl>
           </section>
         </>
