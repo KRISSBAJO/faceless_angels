@@ -34,7 +34,9 @@ services:
       - key: AWS_SECRET_ACCESS_KEY
         sync: false
       - key: EMAIL_PROVIDER
-        value: relykit
+        # Test deployment: verification codes appear in private Render logs.
+        # Switch to relykit and set MAIL_FROM/RELYKIT_API_KEY before launch.
+        value: log
       - key: MAIL_FROM
         sync: false
       - key: RELYKIT_API_KEY

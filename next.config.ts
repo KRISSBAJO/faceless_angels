@@ -1,9 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Builds a small self-contained server for the Docker image.
-  // Calls to /api are passed on by src/app/api/[...path]/route.ts.
-  output: "standalone",
+  // Docker needs a self-contained server; Vercel packages Next.js itself.
+  // Calls to /api are passed on by src/app/api/[...path]/route.ts locally.
+  ...(process.env.VERCEL === "1" ? {} : { output: "standalone" as const }),
   // On Vercel, proxy /api at the routing layer. The Route Handler above runs
   // as a Function there and cannot accept this app's 8 MB documents or
   // 20 MB Word imports. The browser still uses same-origin /api URLs, so its
