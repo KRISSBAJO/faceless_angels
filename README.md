@@ -133,8 +133,17 @@ are still pledges only.
 - A gift is recorded only when the payment company confirms it to the API
   (`/api/giving/webhooks/stripe` and `/api/giving/webhooks/paystack`), and
   each is recorded once however often it arrives. Signatures are checked.
-- Every giver gets an emailed receipt, and can stop a monthly gift from
-  **My giving**.
+- Every gift gets a numbered receipt (FA-R-…), emailed with a signed link
+  that opens it without signing in. Givers can print or save any receipt,
+  and a yearly statement listing every gift, from **My giving**, and can
+  stop a monthly gift there.
+- Yearly statements are emailed each January from the 10th, once gifts are
+  real, and staff can send them by hand. No one gets the same one twice.
+- Receipts carry the legal name, tax ID, and address of the body that
+  received the gift: the US body for dollars, the Nigerian body for naira.
+  An administrator sets these in **Admin → Money**. Until a body is marked
+  as recognised as tax-exempt, receipts say the gift may not be
+  tax-deductible. Have an accountant confirm the wording for each country.
 - **Admin → Money** records running costs and help paid to people. Each needs
   a receipt, and a second person must approve it. The person who recorded it
   cannot.

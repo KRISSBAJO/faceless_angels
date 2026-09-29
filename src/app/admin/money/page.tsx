@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import AdminShell from "@/components/AdminShell";
 import { FormError } from "@/components/Field";
+import GivingEntities from "@/components/GivingEntities";
+import Link from "next/link";
 import { api, errorMessage } from "@/lib/api";
 import { money, PROVIDER_NAMES, type Currency } from "@/lib/giving";
 import { useRequiredUser } from "@/lib/session";
@@ -29,6 +31,7 @@ interface Overview {
     testMode: boolean;
     receivedAt: string;
     receiptSent: boolean;
+    receiptNumber: string;
   }[];
   entries: {
     id: string;
@@ -105,6 +108,28 @@ export default function MoneyPage() {
       await api(`/finance/entries/${id}/decision`, { body: { outcome, note } });
       setNotice(outcome === "approved" ? "Approved. It now shows on the public page." : "Rejected.");
       await load();
+    } catch (err) {
+      setError(errorMessage(err));
+    }
+  }
+
+  async function resend(id: string) {
+    setError(null);
+    try {
+      const result = await api<{ sent: boolean; reason?: string }>(`/finance/gifts/${id}/resend`, { method: "POST" });
+      setNotice(result.sent ? "Receipt sent again." : `Not sent: ${result.reason ?? "the email could not be sent"}.`);
+      await load();
+    } catch (err) {
+      setError(errorMessage(err));
+    }
+  }
+
+  async function sendStatements(year: number) {
+    setError(null);
+    setNotice(null);
+    try {
+      const r = await api<{ sent: number; skipped: number }>("/finance/statements", { body: { year } });
+      setNotice(`Statements for ${year}: ${r.sent} sent${r.skipped ? `, ${r.skipped} already sent or not deliverable` : ""}.`);
     } catch (err) {
       setError(errorMessage(err));
     }
@@ -263,14 +288,15 @@ export default function MoneyPage() {
               <p className="text-sm text-muted">No gifts yet.</p>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[44rem] text-left text-sm">
+                <table className="w-full min-w-[52rem] text-left text-sm">
                   <thead>
                     <tr className="border-b border-ink text-xs uppercase tracking-[0.1em] text-muted">
                       <th className="py-2 pr-4 font-semibold">Received</th>
                       <th className="py-2 pr-4 font-semibold">Amount</th>
                       <th className="py-2 pr-4 font-semibold">Fee</th>
                       <th className="py-2 pr-4 font-semibold">Giver</th>
-                      <th className="py-2 font-semibold">Status</th>
+                      <th className="py-2 pr-4 font-semibold">Status</th>
+                      <th className="py-2 font-semibold">Receipt</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -288,6 +314,18 @@ export default function MoneyPage() {
                           {g.status === "succeeded" ? (g.receiptSent ? "Received, receipt sent" : "Received") : g.status === "refunded" ? "Refunded" : "Disputed by the card holder"}
                           {g.refunded > 0 && g.status !== "refunded" ? ` (${money(g.refunded, g.currency)} refunded)` : ""}
                         </td>
+                        <td className="py-2.5">
+                          <span className="flex flex-wrap gap-x-3">
+                            <Link href={`/giving/receipts/${g.id}`} className="font-mono text-xs underline underline-offset-4">
+                              {g.receiptNumber}
+                            </Link>
+                            {canWrite && g.email ? (
+                              <button type="button" className="text-xs underline underline-offset-4" onClick={() => void resend(g.id)}>
+                                Resend
+                              </button>
+                            ) : null}
+                          </span>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -295,6 +333,27 @@ export default function MoneyPage() {
               </div>
             )}
           </section>
+
+          <section className="flex flex-col gap-3">
+            <h2 className="font-serif text-2xl">Yearly statements</h2>
+            <p className="max-w-2xl text-sm leading-6 text-muted">
+              Every giver gets one statement per year, listing each gift, for
+              the tax season. They go out by email on their own each January
+              from the 10th, once gifts are real. Send them by hand here if
+              needed. No one gets the same statement twice.
+            </p>
+            {canWrite ? (
+              <div className="flex flex-wrap gap-3">
+                {[new Date().getFullYear() - 1, new Date().getFullYear()].map((year) => (
+                  <button key={year} type="button" className="btn btn-ghost px-4 py-2 text-sm" onClick={() => void sendStatements(year)}>
+                    Email statements for {year}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </section>
+
+          <GivingEntities canEdit={user.role === "admin"} />
         </>
       )}
     </AdminShell>

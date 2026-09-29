@@ -1,8 +1,11 @@
 import { Type } from 'class-transformer';
 import {
+  IsBoolean,
   IsEmail,
   IsIn,
+  IsInt,
   IsNumber,
+  Max,
   IsOptional,
   IsString,
   Matches,
@@ -71,4 +74,36 @@ export class LedgerDecisionDto {
   @IsString()
   @MaxLength(500)
   note?: string;
+}
+
+export class EntityDto {
+  @IsString()
+  @MaxLength(200)
+  legalName!: string;
+
+  @IsString()
+  @MaxLength(60)
+  registrationNumber!: string;
+
+  @IsString()
+  @MaxLength(400)
+  address!: string;
+
+  @IsIn(['not_recognised', 'recognised'])
+  taxStatus!: 'not_recognised' | 'recognised';
+
+  @IsString()
+  @MaxLength(600)
+  taxStatement!: string;
+
+  @IsBoolean()
+  religiousBenefits!: boolean;
+}
+
+export class SendStatementsDto {
+  @Type(() => Number)
+  @IsInt()
+  @Min(2020)
+  @Max(2100)
+  year!: number;
 }

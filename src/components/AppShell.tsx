@@ -17,7 +17,7 @@ function VerifyEmailBanner({ user }: { user: User }) {
   }
 
   return (
-    <div className="border-b border-gold-bright bg-gold-soft">
+    <div className="border-b border-gold-bright bg-gold-soft print:hidden">
       <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-5 py-3 text-sm">
         <p>
           {state === "sent"
@@ -70,7 +70,7 @@ export default function AppShell({
       >
         {children}
       </main>
-      <footer className="border-t border-line">
+      <footer className="border-t border-line print:hidden">
         <p
           className={`mx-auto w-full px-5 py-6 text-sm text-muted ${
             wide ? "max-w-6xl" : "max-w-5xl"

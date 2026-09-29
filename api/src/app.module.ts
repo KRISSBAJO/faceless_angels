@@ -1,3 +1,4 @@
+import { ReceiptsService } from './giving/receipts.service';
 import {
   FinanceController,
   GivingMemberController,
@@ -108,6 +109,7 @@ class HealthController {
     PatveroService,
     GivingService,
     LedgerService,
+    ReceiptsService,
     SeedService,
     { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],

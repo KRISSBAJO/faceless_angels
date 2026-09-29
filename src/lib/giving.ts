@@ -73,3 +73,65 @@ export function money(amount: number, currency: string) {
     maximumFractionDigits: Number.isInteger(amount) ? 0 : 2,
   }).format(amount);
 }
+
+export interface GivingEntity {
+  currency: Currency;
+  legalName: string;
+  registrationLabel: string;
+  registrationNumber: string;
+  address: string;
+  taxStatus: "not_recognised" | "recognised";
+  taxStatement: string;
+  religiousBenefits: boolean;
+}
+
+interface TaxLines {
+  exchange: string;
+  status: string;
+}
+
+export interface GiftReceipt {
+  receiptNumber: string;
+  receivedAt: string;
+  giver: { name: string | null; email: string | null };
+  kind: "one_time" | "monthly";
+  currency: Currency;
+  amount: number;
+  refunded: number;
+  status: string;
+  method: string;
+  reference: string;
+  testMode: boolean;
+  entity: GivingEntity;
+  tax: TaxLines;
+  issuedAt: string;
+}
+
+export interface GivingStatement {
+  year: number;
+  currency: Currency;
+  giver: { name: string | null; email: string };
+  gifts: {
+    receiptNumber: string;
+    receivedAt: string;
+    kind: string;
+    amount: number;
+    refunded: number;
+    kept: number;
+    testMode: boolean;
+  }[];
+  total: number;
+  includesTest: boolean;
+  entity: GivingEntity;
+  tax: TaxLines;
+  issuedAt: string;
+}
+
+export function longDate(iso: string) {
+  return new Date(iso).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+}

@@ -158,7 +158,7 @@ export default function SiteHeader({
     : [];
 
   return (
-    <header className="border-b border-line">
+    <header className="border-b border-line print:hidden">
       <div
         className={`mx-auto flex w-full flex-wrap items-center justify-between gap-x-8 gap-y-3 px-5 py-4 ${
           wide ? "max-w-6xl" : "max-w-5xl"

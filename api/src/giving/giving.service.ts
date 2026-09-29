@@ -10,7 +10,6 @@ import { AuditService } from '../audit/audit.service';
 import type { SessionUser } from '../auth/auth.service';
 import { config } from '../config';
 import { DbService, Queryable } from '../db/db.service';
-import { MailService } from '../mail/mail.service';
 import {
   Currency,
   Kind,
@@ -28,6 +27,7 @@ import {
   verifyPaystackSignature,
   verifyStripeSignature,
 } from './providers';
+import { ReceiptsService } from './receipts.service';
 
 /** Smallest and largest gift, in the currency's smallest unit. */
 const LIMITS: Record<Currency, { min: number; max: number }> = {
@@ -83,7 +83,7 @@ export class GivingService {
   constructor(
     private readonly db: DbService,
     private readonly audit: AuditService,
-    private readonly mail: MailService,
+    private readonly receipts: ReceiptsService,
   ) {}
 
   providers() {
@@ -309,37 +309,9 @@ export class GivingService {
       return { id: row.rows[0].id, email };
     });
     if (inserted?.email) {
-      await this.sendReceipt(inserted.id, inserted.email, gift);
+      await this.receipts.emailReceipt(inserted.id);
     }
     return Boolean(inserted);
-  }
-
-  private async sendReceipt(donationId: string, email: string, gift: NewDonation) {
-    const amount = formatMoney(gift.amountMinor, gift.currency);
-    const date = gift.receivedAt.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-    const result = await this.mail.send({
-      to: email,
-      subject: `Your gift of ${amount} to Faceless Angels`,
-      paragraphs: [
-        `Thank you. We received your ${gift.kind === 'monthly' ? 'monthly ' : ''}gift of ${amount} on ${date}.`,
-        'It supports the running of Faceless Angels: the people and tools that check requests, keep documents safe, and serve the prayer network. It does not go to a specific need.',
-        `Reference: ${gift.providerRef}`,
-        ...(gift.livemode ? [] : ['This was a test payment. No real money moved.']),
-        config.giving.receiptNote,
-      ],
-      action: { label: 'See where the money goes', url: `${config.webUrl}/transparency` },
-      idempotencyKey: `receipt-${donationId}`,
-    });
-    if (result.sent) {
-      await this.db.query(
-        'update donations set receipt_sent_at = now() where id = $1',
-        [donationId],
-      );
-    }
   }
 
   private async markWebhook(provider: string, event: string) {

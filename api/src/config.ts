@@ -89,9 +89,9 @@ export const config = {
         '',
       ),
     },
-    receiptNote:
-      env('GIVING_RECEIPT_NOTE') ||
-      'Keep this email as your record of the gift. No goods or services were given in exchange for it.',
+    // An extra line for every receipt, if wanted. The tax wording comes
+    // from each legal body's details, set in Admin -> Money.
+    receiptNote: env('GIVING_RECEIPT_NOTE'),
   },
   seed: {
     email: env('SEED_OWNER_EMAIL').toLowerCase(),

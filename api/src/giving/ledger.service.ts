@@ -93,9 +93,10 @@ export class LedgerService {
       livemode: boolean;
       received_at: Date;
       receipt_sent_at: Date | null;
+      receipt_no: string;
     }>(
       `select id, provider, kind, currency, amount_minor, fee_minor, refunded_minor,
-              status, email, livemode, received_at, receipt_sent_at
+              status, email, livemode, received_at, receipt_sent_at, receipt_no
        from donations order by received_at desc limit 100`,
     );
     const hooks = await this.db.query<{
@@ -122,6 +123,7 @@ export class LedgerService {
         testMode: !g.livemode,
         receivedAt: g.received_at,
         receiptSent: Boolean(g.receipt_sent_at),
+        receiptNumber: `FA-R-${g.receipt_no}`,
       })),
       entries: await this.entries(),
       categories: await this.categories(),
