@@ -11,7 +11,11 @@ async function bootstrap() {
     // Emails carry links to the site, so they would point at localhost.
     throw new Error('WEB_URL must be set in production, e.g. https://facelessangels.org');
   }
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  // rawBody keeps the exact bytes of each request, so payment webhooks can
+  // be checked against their signatures.
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    rawBody: true,
+  });
   // Only the website reaches the API, and it passes on the visitor's
   // address. Trusting one hop lets rate limits count visitors, not the site.
   app.set('trust proxy', 1);

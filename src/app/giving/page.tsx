@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import AppShell from "@/components/AppShell";
+import MyGifts from "@/components/MyGifts";
 import { FormError } from "@/components/Field";
 import { api, errorMessage, type Giving } from "@/lib/api";
 import { formatCents, formatMoment } from "@/lib/format";
@@ -196,6 +197,8 @@ export default function GivingPage() {
           </section>
         </>
       ) : null}
+
+      <MyGifts />
     </AppShell>
   );
 }

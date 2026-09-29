@@ -97,6 +97,7 @@ const FOOTER_LINKS: [string, [string, string][]][] = [
       ["/prayer/groups", "Prayer groups"],
       ["/needs", "Open needs"],
       ["/ask", "Ask for help"],
+      ["/donate", "Support the work"],
     ],
   ],
   [
@@ -113,6 +114,7 @@ const FOOTER_LINKS: [string, [string, string][]][] = [
       ["/#how", "How giving works"],
       ["/#safeguards", "Safeguards"],
       ["/#privacy", "Privacy"],
+      ["/transparency", "Where the money goes"],
     ],
   ],
 ];
@@ -447,6 +449,17 @@ export default function Home() {
               </Link>
             </div>
           </div>
+          <p className="text-sm leading-6 text-muted">
+            Faceless Angels runs on free-will gifts.{" "}
+            <Link href="/donate" className="font-medium text-ink underline underline-offset-4">
+              Support the work
+            </Link>{" "}
+            or{" "}
+            <Link href="/transparency" className="font-medium text-ink underline underline-offset-4">
+              see where the money goes
+            </Link>
+            .
+          </p>
         </section>
       </main>
 

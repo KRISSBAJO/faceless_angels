@@ -69,6 +69,16 @@ services:
       # A read-only key made for this app alone. Never shared with the website.
       - key: PATVERO_API_KEY
         sync: false
+      # Giving. Test keys (sk_test_) until the legal body is settled. Live keys
+      # are refused while GIVING_LIVE is false.
+      - key: GIVING_LIVE
+        value: "false"
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: PAYSTACK_SECRET_KEY
+        sync: false
       # The first administrator. They must choose a new password at first sign-in.
       - key: SEED_OWNER_EMAIL
         sync: false

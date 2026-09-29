@@ -122,11 +122,34 @@ Render names a header visitors cannot forge, put its name in
   held in `api/data/bible`. No AI is used for scripture.
 - Admin: people, invitations, need types and limits, agreement wording, audit log
 
+## Giving
+
+People can give once or every month to support the running of Faceless
+Angels: Stripe for US dollars, Paystack for naira. Gifts to a specific need
+are still pledges only.
+
+- `/donate` sends the giver to Stripe's or Paystack's own payment page. Card
+  details never reach our servers.
+- A gift is recorded only when the payment company confirms it to the API
+  (`/api/giving/webhooks/stripe` and `/api/giving/webhooks/paystack`), and
+  each is recorded once however often it arrives. Signatures are checked.
+- Every giver gets an emailed receipt, and can stop a monthly gift from
+  **My giving**.
+- **Admin → Money** records running costs and help paid to people. Each needs
+  a receipt, and a second person must approve it. The person who recorded it
+  cannot.
+- `/transparency` shows the totals: gifts, fees, costs by kind, help by need,
+  and what is held, month by month. No names or single gifts.
+
+Use test keys (`sk_test_`) until the legal body is settled. Live keys are
+refused unless `GIVING_LIVE=true`. When going live, set the webhook address
+in each dashboard and put Stripe's signing secret in `STRIPE_WEBHOOK_SECRET`.
+
 ## What is not built
 
-Payments. A pledge is a recorded promise and no money moves. Who legally
-receives and controls contributions must be settled with counsel and a payment
-provider first.
+Real money. Giving runs in test mode until the legal body that receives
+gifts is settled with counsel (see Giving above). Gifts to a specific need
+are still pledges: a recorded promise, with no money moving.
 
 Sessions made through a meeting provider. Today a host makes the meeting in
 Patvero, Zoom, or Teams and pastes its link. Providers sit behind one
@@ -134,9 +157,9 @@ interface in `api/src/prayer/meeting-providers.ts`, so Patvero can gain real
 integration without changing group or session records.
 
 A pasted Patvero link is checked against Patvero's public lookup, so a
-meeting that has ended or never existed is refused. Creating Patvero
-meetings from here needs Patvero to offer an API key for meetings, which it
-does not yet.
+meeting that has ended or never existed is refused. Patvero's Developer API
+is read-only and its meeting list has no join links, so meetings cannot yet
+be created or picked from here.
 
 ## Safeguards
 

@@ -29,6 +29,12 @@ export const JOURNAL_STAFF_ROLES: Role[] = ['editor', 'pastor', 'admin'];
 /** Roles that may open cases and identity papers. */
 export const REVIEW_ROLES: Role[] = ['reviewer', 'senior_reviewer', 'admin'];
 
+/** Roles that see gifts and the money records. Auditors read only. */
+export const FINANCE_ROLES: Role[] = ['admin', 'payment_approver', 'auditor'];
+
+/** Roles that record and approve costs and help given. */
+export const FINANCE_WRITERS: Role[] = ['admin', 'payment_approver'];
+
 export const config = {
   production: env('NODE_ENV') === 'production',
   webUrl: (env('WEB_URL') || 'http://localhost:3230').replace(/\/$/, ''),
@@ -62,6 +68,30 @@ export const config = {
       'https://api.patvero.com/api/v1'
     ).replace(/\/$/, ''),
     apiKey: env('PATVERO_API_KEY'),
+  },
+  giving: {
+    // Real money moves only when this is true and the keys are live keys.
+    // Until the legal body is settled it stays false, and live keys are refused.
+    live: env('GIVING_LIVE') === 'true',
+    stripe: {
+      secretKey: env('STRIPE_SECRET_KEY'),
+      webhookSecret: env('STRIPE_WEBHOOK_SECRET'),
+      apiBase: (env('STRIPE_API_BASE') || 'https://api.stripe.com').replace(
+        /\/$/,
+        '',
+      ),
+    },
+    paystack: {
+      // Paystack signs its webhooks with this same secret key.
+      secretKey: env('PAYSTACK_SECRET_KEY'),
+      apiBase: (env('PAYSTACK_API_BASE') || 'https://api.paystack.co').replace(
+        /\/$/,
+        '',
+      ),
+    },
+    receiptNote:
+      env('GIVING_RECEIPT_NOTE') ||
+      'Keep this email as your record of the gift. No goods or services were given in exchange for it.',
   },
   seed: {
     email: env('SEED_OWNER_EMAIL').toLowerCase(),

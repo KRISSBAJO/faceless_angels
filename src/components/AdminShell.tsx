@@ -5,11 +5,23 @@ import { usePathname } from "next/navigation";
 import type { User } from "@/lib/api";
 import AppShell from "./AppShell";
 
-const TABS: { href: string; label: string; adminOnly: boolean }[] = [
+const TABS: {
+  href: string;
+  label: string;
+  adminOnly: boolean;
+  /** When set, exactly these roles see the tab. */
+  roles?: string[];
+}[] = [
   { href: "/admin", label: "Overview", adminOnly: false },
   { href: "/admin/people", label: "People", adminOnly: true },
   { href: "/admin/invites", label: "Invitations", adminOnly: true },
   { href: "/admin/settings", label: "Need types and wording", adminOnly: true },
+  {
+    href: "/admin/money",
+    label: "Money",
+    adminOnly: false,
+    roles: ["admin", "payment_approver", "auditor"],
+  },
   { href: "/admin/connections", label: "Connections", adminOnly: true },
   { href: "/admin/audit", label: "Audit log", adminOnly: false },
 ];
@@ -26,7 +38,11 @@ export default function AdminShell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const tabs = TABS.filter((tab) => user.role === "admin" || !tab.adminOnly);
+  const tabs = TABS.filter((tab) =>
+    tab.roles
+      ? tab.roles.includes(user.role)
+      : user.role === "admin" || (user.role === "auditor" && !tab.adminOnly),
+  );
 
   return (
     <AppShell user={user}>

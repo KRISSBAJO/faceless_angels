@@ -1,3 +1,10 @@
+import {
+  FinanceController,
+  GivingMemberController,
+  GivingPublicController,
+} from './giving/giving.controller';
+import { GivingService } from './giving/giving.service';
+import { LedgerService } from './giving/ledger.service';
 import { PatveroService } from './patvero/patvero.service';
 import { Controller, Get, Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
@@ -71,6 +78,9 @@ class HealthController {
     JournalMemberController,
     JournalController,
     AdminController,
+    GivingPublicController,
+    GivingMemberController,
+    FinanceController,
   ],
   providers: [
     DbService,
@@ -96,6 +106,8 @@ class HealthController {
     BibleService,
     AdminService,
     PatveroService,
+    GivingService,
+    LedgerService,
     SeedService,
     { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],

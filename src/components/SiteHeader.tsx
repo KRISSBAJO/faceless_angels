@@ -20,6 +20,8 @@ const ABOUT: Links = [
   ["/#safeguards", "Safeguards"],
   ["/#privacy", "Privacy"],
   ["/#community", "Get involved"],
+  ["/donate", "Support Faceless Angels"],
+  ["/transparency", "Where the money goes"],
 ];
 
 /** A small drop-down in the header. Closes on Escape, a click away, or a choice. */
@@ -138,6 +140,9 @@ export default function SiteHeader({
     }
     if (["editor", "pastor", "admin"].includes(user.role)) {
       work.push(["/journal/studio", "Journal studio"]);
+    }
+    if (["admin", "payment_approver", "auditor"].includes(user.role)) {
+      work.push(["/admin/money", "Money"]);
     }
   }
 
