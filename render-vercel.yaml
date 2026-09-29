@@ -1,0 +1,57 @@
+# Hybrid deployment: Vercel website, Render API, Renviq PostgreSQL.
+# Select this file when creating the Render Blueprint. The existing
+# render.yaml remains available for the all-Render deployment.
+services:
+  - type: web
+    name: faceless-angels-api
+    runtime: docker
+    plan: free
+    region: ohio
+    dockerfilePath: ./api/Dockerfile
+    dockerContext: ./api
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: PORT
+        value: "4010"
+      - key: NODE_ENV
+        value: production
+      # Use a dedicated Faceless Angels database on Renviq.
+      - key: DATABASE_URL
+        sync: false
+      # The final Vercel website URL, also used for email links.
+      - key: WEB_URL
+        sync: false
+      # Back this up: existing encrypted documents cannot be read without it.
+      - key: EVIDENCE_ENCRYPTION_KEY
+        generateValue: true
+      - key: AWS_REGION
+        value: us-east-1
+      - key: AWS_S3_BUCKET
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: EMAIL_PROVIDER
+        value: relykit
+      - key: MAIL_FROM
+        sync: false
+      - key: RELYKIT_API_KEY
+        sync: false
+      - key: PATVERO_API_BASE_URL
+        value: https://api.patvero.com/api/v1
+      - key: PATVERO_API_KEY
+        sync: false
+      - key: GIVING_LIVE
+        value: "false"
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: PAYSTACK_SECRET_KEY
+        sync: false
+      - key: SEED_OWNER_EMAIL
+        sync: false
+      - key: SEED_OWNER_PASSWORD
+        sync: false

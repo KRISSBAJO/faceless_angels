@@ -59,6 +59,52 @@ Staff cannot sign themselves up. An administrator invites them from
 
 ## Going online
 
+### Vercel website + Render API + Renviq database
+
+Use `render-vercel.yaml` for this setup. It creates only the API on Render;
+the existing `render.yaml` is for hosting all three parts on Render.
+
+1. In Renviq, create a **separate Faceless Angels PostgreSQL database**. Do
+   not use a LogaDash database. Copy its connection URL from Renviq's
+   credentials screen; keep it secret. The API applies its SQL migrations on
+   first start, so a new database starts with the schema it needs. If you want
+   existing local records online, migrate them before pointing the live API at
+   the database.
+2. In Render, create a Blueprint from this repository and select
+   `render-vercel.yaml`. Set `DATABASE_URL` to that Renviq URL. Fill in the
+   other prompted values. In particular, production requires a separate S3
+   bucket and credentials for encrypted documents. Keep `GIVING_LIVE=false`
+   and use payment test keys. The Blueprint creates a public HTTPS API in
+   Render's Ohio region, near Renviq's Chicago region. The Blueprint requests
+   Render's free web service plan, which sleeps after 15 minutes idle and
+   takes about a minute to wake. Check
+   `https://<render-api-host>/api/health` after it deploys.
+3. In Vercel, import this repository as a Next.js project with the repository
+   root as its root directory. Set `API_URL` to the Render API's **public
+   HTTPS origin** (no `/api` suffix), `WEB_URL` to the final Vercel or custom
+   domain URL, and `CONTACT_EMAIL` to the address shown on the site. Enable
+   Vercel's system environment variables so `VERCEL=1` is available at build
+   time. Deploy and check `/healthz`, `/api/health`, and a sign-in on the
+   Vercel domain.
+4. Set `WEB_URL` on the Render API to the same final Vercel URL and redeploy
+   the API. Configure Stripe and Paystack webhook URLs under that website
+   domain when you are ready to test giving. Save Render's generated
+   `EVIDENCE_ENCRYPTION_KEY` outside Render; losing it makes stored documents
+   unreadable.
+
+On Vercel, Next.js uses an external rewrite for `/api/*`, keeping API calls
+and session cookies on the website's address. This also sends document and
+Word uploads directly through Vercel's proxy. The local and all-Render setups
+continue using the Next.js route handler. Vercel Functions have a 4.5 MB
+request limit, which is too small for this app's 8 MB documents and 20 MB Word
+imports.
+
+The Renviq database URL and all API secrets belong on Render only. Vercel
+needs only `API_URL`, `WEB_URL`, and `CONTACT_EMAIL` for this setup. Never put
+the database URL or payment keys in a `NEXT_PUBLIC_` variable.
+
+### All on Render
+
 `render.yaml` describes the whole site for [Render](https://render.com):
 
 | Part | Render type | Who can reach it |
