@@ -72,26 +72,19 @@ export default function AppShell({
         {children}
       </main>
       <footer className="border-t border-line print:hidden">
-        <p
-          className={`mx-auto w-full px-5 py-6 text-sm text-muted ${
-            wide ? "max-w-6xl" : "max-w-5xl"
-          }`}
-        >
-          Faceless Angels is not an emergency service. If you are in immediate
-          danger, call 911.
-        </p>
-        <nav
-          aria-label="Policies"
-          className={`mx-auto flex w-full flex-wrap gap-x-5 gap-y-1 px-5 pb-6 text-sm text-muted ${
-            wide ? "max-w-6xl" : "max-w-5xl"
-          }`}
-        >
-          <Link href="/contact" className="hover:text-ink">Contact</Link>
-          <Link href="/privacy" className="hover:text-ink">Privacy</Link>
-          <Link href="/terms" className="hover:text-ink">Terms</Link>
-          <Link href="/giving-policy" className="hover:text-ink">Giving and refunds</Link>
-          <Link href="/transparency" className="hover:text-ink">Where the money goes</Link>
-        </nav>
+        <div className={`mx-auto w-full px-5 py-7 ${wide ? "max-w-6xl" : "max-w-5xl"}`}>
+          <p className="font-serif text-lg">Faceless Angels</p>
+          <nav aria-label="Policies" className="mt-4 grid grid-cols-2 gap-x-5 gap-y-1 text-sm text-muted sm:flex sm:flex-wrap sm:gap-x-5">
+            <Link href="/contact" className="flex min-h-10 items-center hover:text-ink">Contact</Link>
+            <Link href="/privacy" className="flex min-h-10 items-center hover:text-ink">Privacy</Link>
+            <Link href="/terms" className="flex min-h-10 items-center hover:text-ink">Terms</Link>
+            <Link href="/giving-policy" className="flex min-h-10 items-center hover:text-ink">Giving and refunds</Link>
+            <Link href="/transparency" className="flex min-h-10 items-center hover:text-ink">Where the money goes</Link>
+          </nav>
+          <p className="mt-5 border-t border-line pt-4 text-xs leading-relaxed text-muted sm:text-sm">
+            Faceless Angels is not an emergency service. If you are in immediate danger, call 911.
+          </p>
+        </div>
       </footer>
     </>
   );

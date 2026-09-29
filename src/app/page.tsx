@@ -473,8 +473,8 @@ export default function Home() {
       </main>
 
       <footer className="border-t border-line bg-surface">
-        <div className="mx-auto grid w-full max-w-6xl gap-10 px-5 py-12 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1fr]">
-          <div className="flex flex-col gap-3">
+        <div className="mx-auto w-full max-w-6xl px-5 pt-9 md:hidden">
+          <div className="flex flex-col gap-2 pb-7">
             <div className="flex items-center gap-2.5">
               <Mark />
               <span className="font-serif text-lg">Faceless Angels</span>
@@ -484,23 +484,47 @@ export default function Home() {
             </p>
           </div>
           {FOOTER_LINKS.map(([heading, links]) => (
-            <nav key={heading} aria-label={heading} className="flex flex-col gap-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">
+            <details key={heading} className="group border-t border-line">
+              <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between text-sm font-semibold uppercase tracking-[0.12em] [&::-webkit-details-marker]:hidden">
                 {heading}
-              </p>
+                <span aria-hidden="true" className="text-xl font-normal text-muted transition-transform group-open:rotate-180">⌄</span>
+              </summary>
+              <nav aria-label={heading} className="pb-4">
+                <ul className="flex flex-col gap-1">
+                  {links.map(([href, label]) => (
+                    <li key={href}>
+                      <Link href={href} className="flex min-h-10 items-center text-sm text-muted hover:text-ink">
+                        {label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            </details>
+          ))}
+        </div>
+        <div className="mx-auto hidden w-full max-w-6xl gap-10 px-5 py-12 md:grid md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1fr]">
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2.5">
+              <Mark />
+              <span className="font-serif text-lg">Faceless Angels</span>
+            </div>
+            <p className="text-sm text-muted">Pray together. Help quietly. Love openly.</p>
+          </div>
+          {FOOTER_LINKS.map(([heading, links]) => (
+            <nav key={heading} aria-label={heading} className="flex flex-col gap-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">{heading}</p>
               <ul className="flex flex-col gap-2 text-sm">
                 {links.map(([href, label]) => (
                   <li key={href}>
-                    <Link href={href} className="hover:underline hover:underline-offset-4">
-                      {label}
-                    </Link>
+                    <Link href={href} className="hover:underline hover:underline-offset-4">{label}</Link>
                   </li>
                 ))}
               </ul>
             </nav>
           ))}
         </div>
-        <p className="mx-auto w-full max-w-6xl border-t border-line px-5 py-5 text-sm text-muted">
+        <p className="mx-auto w-full max-w-6xl border-t border-line px-5 py-5 text-xs leading-relaxed text-muted sm:text-sm">
           Faceless Angels is not an emergency service. If you are in immediate
           danger, call 911.
         </p>

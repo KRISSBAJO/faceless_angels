@@ -118,8 +118,31 @@ export default function SiteHeader({
   wide?: boolean;
 }) {
   const router = useRouter();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const header = useRef<HTMLElement>(null);
+  const mobileButton = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const closeAway = (event: PointerEvent) => {
+      if (!header.current?.contains(event.target as Node)) setMobileOpen(false);
+    };
+    const closeEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMobileOpen(false);
+        mobileButton.current?.focus();
+      }
+    };
+    document.addEventListener("pointerdown", closeAway);
+    document.addEventListener("keydown", closeEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeAway);
+      document.removeEventListener("keydown", closeEscape);
+    };
+  }, [mobileOpen]);
 
   async function signOut() {
+    setMobileOpen(false);
     await api("/auth/sign-out", { method: "POST" }).catch(() => undefined);
     router.push("/");
     router.refresh();
@@ -158,21 +181,38 @@ export default function SiteHeader({
     : [];
 
   return (
-    <header className="border-b border-line print:hidden">
+    <header ref={header} className="relative z-40 border-b border-line bg-paper print:hidden">
       <div
-        className={`mx-auto flex w-full flex-wrap items-center justify-between gap-x-8 gap-y-3 px-5 py-4 ${
+        className={`mx-auto flex w-full items-center justify-between gap-4 px-5 py-3 lg:py-4 ${
           wide ? "max-w-6xl" : "max-w-5xl"
         }`}
       >
-        <Link href="/" className="flex items-center gap-2.5">
+        <Link href="/" onClick={() => setMobileOpen(false)} className="flex min-w-0 items-center gap-2.5 whitespace-nowrap">
           <Mark />
-          <span className="font-serif text-xl">Faceless Angels</span>
+          <span className="font-serif text-lg sm:text-xl">Faceless Angels</span>
         </Link>
         {showNav ? (
-          <nav
-            aria-label="Main"
-            className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm"
+          <>
+          <button
+            ref={mobileButton}
+            type="button"
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            aria-controls="mobile-site-menu"
+            aria-expanded={mobileOpen}
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-line text-ink lg:hidden"
           >
+            {mobileOpen ? (
+              <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                <path d="M5 5l14 14M19 5L5 19" />
+              </svg>
+            ) : (
+              <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                <path d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
+          <nav aria-label="Main" className="hidden items-center gap-6 text-sm lg:flex">
             {!user || ready
               ? MAIN.map(([href, label]) => (
                   <Link
@@ -207,8 +247,72 @@ export default function SiteHeader({
               </>
             )}
           </nav>
+          </>
         ) : null}
       </div>
+      {showNav && mobileOpen ? (
+        <nav
+          id="mobile-site-menu"
+          aria-label="Mobile navigation"
+          className="absolute inset-x-0 top-full max-h-[calc(100dvh-4.25rem)] overflow-y-auto border-b border-line bg-paper px-5 pb-6 pt-2 shadow-[0_22px_32px_-24px_rgba(0,0,0,0.65)] lg:hidden"
+        >
+          <div className="mx-auto flex max-w-5xl flex-col">
+            {(!user || ready) && MAIN.map(([href, label]) => (
+              <Link key={href} href={href} onClick={() => setMobileOpen(false)} className="flex min-h-12 items-center border-b border-line text-base font-medium">
+                {label}
+              </Link>
+            ))}
+            {(!user || ready) ? (
+              <details className="group border-b border-line">
+                <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between text-base font-medium [&::-webkit-details-marker]:hidden">
+                  About <span aria-hidden="true" className="text-muted transition-transform group-open:rotate-180">⌄</span>
+                </summary>
+                <div className="flex flex-col pb-2">
+                  {ABOUT.map(([href, label]) => (
+                    <Link key={href} href={href} onClick={() => setMobileOpen(false)} className="flex min-h-11 items-center pl-4 text-sm text-muted">
+                      {label}
+                    </Link>
+                  ))}
+                </div>
+              </details>
+            ) : null}
+            {work.length > 0 ? (
+              <details className="group border-b border-line">
+                <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between text-base font-medium [&::-webkit-details-marker]:hidden">
+                  Work <span aria-hidden="true" className="text-muted transition-transform group-open:rotate-180">⌄</span>
+                </summary>
+                <div className="flex flex-col pb-2">
+                  {work.map(([href, label]) => (
+                    <Link key={href} href={href} onClick={() => setMobileOpen(false)} className="flex min-h-11 items-center pl-4 text-sm text-muted">
+                      {label}
+                    </Link>
+                  ))}
+                </div>
+              </details>
+            ) : null}
+            {user ? (
+              <details className="group border-b border-line">
+                <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between text-base font-medium [&::-webkit-details-marker]:hidden">
+                  Account <span aria-hidden="true" className="text-muted transition-transform group-open:rotate-180">⌄</span>
+                </summary>
+                <div className="flex flex-col pb-2">
+                  {own.map(([href, label]) => (
+                    <Link key={href} href={href} onClick={() => setMobileOpen(false)} className="flex min-h-11 items-center pl-4 text-sm text-muted">
+                      {label}
+                    </Link>
+                  ))}
+                  <button type="button" onClick={signOut} className="flex min-h-11 items-center pl-4 text-left text-sm text-muted">Sign out</button>
+                </div>
+              </details>
+            ) : (
+              <>
+                <Link href="/sign-in" onClick={() => setMobileOpen(false)} className="flex min-h-12 items-center border-b border-line text-base font-medium">Sign in</Link>
+                <Link href="/ask" onClick={() => setMobileOpen(false)} className="mt-5 flex min-h-12 items-center justify-center rounded-full bg-action px-5 font-semibold text-on-action">Ask for help</Link>
+              </>
+            )}
+          </div>
+        </nav>
+      ) : null}
     </header>
   );
 }
