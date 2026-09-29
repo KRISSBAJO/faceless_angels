@@ -38,6 +38,10 @@ server.
 Database changes are plain SQL files in `api/migrations`. The API applies new
 ones when it starts.
 
+To check everything still works end to end, run `node tests/run.mjs` with the
+site running. It uses stand-ins for Stripe and Paystack and never sends real
+email. GitHub runs the same checks on every push. See `tests/README.md`.
+
 If calls from the API container to Patvero or RelyKit fail with "unable to
 verify the first certificate", antivirus on the computer (Norton, for one) is
 re-signing secure connections. Export its root certificate to

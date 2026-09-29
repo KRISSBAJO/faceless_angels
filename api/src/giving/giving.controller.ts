@@ -73,6 +73,20 @@ export class GivingPublicController {
     return this.receipts.statementByLink(id, token);
   }
 
+  /** The registered bodies behind giving, for the policy and contact pages. */
+  @Get('giving/organisations')
+  async organisations() {
+    return (await this.receipts.entities())
+      .filter((e) => e.legalName)
+      .map((e) => ({
+        currency: e.currency,
+        legalName: e.legalName,
+        address: e.address,
+        registrationLabel: e.registrationLabel,
+        registrationNumber: e.registrationNumber,
+      }));
+  }
+
   @Get('giving/options')
   options() {
     return this.giving.options();

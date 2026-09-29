@@ -1,0 +1,15 @@
+# Used only by the automated tests (node tests/run.mjs), on top of
+# docker-compose.yml. It points the API at a local stand-in for Stripe and
+# Paystack and keeps all email in the log. These keys are made up.
+services:
+  api:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      EMAIL_PROVIDER: log
+      GIVING_LIVE: "false"
+      STRIPE_SECRET_KEY: sk_test_local_standin
+      STRIPE_WEBHOOK_SECRET: whsec_local_standin
+      STRIPE_API_BASE: http://host.docker.internal:47330/stripe
+      PAYSTACK_SECRET_KEY: sk_test_local_standin_paystack
+      PAYSTACK_API_BASE: http://host.docker.internal:47330/paystack

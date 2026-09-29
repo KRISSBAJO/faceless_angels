@@ -25,6 +25,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     { url: `${SITE_URL}/needs`, changeFrequency: "daily", priority: 0.8 },
+    { url: `${SITE_URL}/donate`, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${SITE_URL}/transparency`, changeFrequency: "weekly", priority: 0.6 },
+    ...["/contact", "/privacy", "/terms", "/giving-policy"].map((path) => ({
+      url: `${SITE_URL}${path}`,
+      changeFrequency: "yearly" as const,
+      priority: 0.3,
+    })),
   ];
 
   let everything: Everything | null = null;

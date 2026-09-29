@@ -144,6 +144,15 @@ export default function AuthForm({ mode }: { mode: "sign-up" | "sign-in" }) {
             />
           </Field>
           <FormError message={error} />
+          {isSignUp ? (
+            <p className="text-xs leading-5 text-muted">
+              By creating an account you agree to the{" "}
+              <Link href="/terms" className="underline underline-offset-4">terms of use</Link> and
+              confirm you are 18 or older. The{" "}
+              <Link href="/privacy" className="underline underline-offset-4">privacy page</Link> says
+              how we use your information.
+            </p>
+          ) : null}
           <button type="submit" className="btn btn-primary" disabled={busy}>
             {isSignUp ? "Create account" : "Sign in"}
           </button>

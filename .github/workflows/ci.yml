@@ -1,0 +1,85 @@
+name: Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  types-and-lint:
+    name: Types and lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            api/package-lock.json
+      - run: npm ci
+      - run: npx tsc --noEmit -p .
+      - run: npx eslint src
+      - run: npm ci
+        working-directory: api
+      - run: npx tsc --noEmit -p .
+        working-directory: api
+
+  end-to-end:
+    name: End to end
+    needs: types-and-lint
+    runs-on: ubuntu-latest
+    env:
+      CI: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            api/package-lock.json
+
+      # Throwaway settings for this run only. Nothing here is a real secret.
+      - name: Write settings for this run
+        run: |
+          {
+            echo "POSTGRES_PASSWORD=$(openssl rand -hex 24)"
+            echo "EVIDENCE_ENCRYPTION_KEY=$(openssl rand -base64 32)"
+            echo "SEED_OWNER_EMAIL=owner@example.test"
+            echo "SEED_OWNER_PASSWORD=Ow-$(openssl rand -hex 12)"
+            echo "WEB_URL=http://localhost:3230"
+            echo "EMAIL_PROVIDER=log"
+          } > .env
+
+      - name: Start the database and API with test settings
+        run: docker compose -f docker-compose.yml -f docker-compose.test.yml up -d --build
+
+      - run: npm ci
+      - run: npm ci
+        working-directory: api
+
+      - name: Build and start the website
+        env:
+          API_URL: http://localhost:4010
+          WEB_URL: http://localhost:3230
+        run: |
+          npm run build
+          cp -r .next/static .next/standalone/.next/static
+          cp -r public .next/standalone/public
+          PORT=3230 HOSTNAME=0.0.0.0 nohup node .next/standalone/server.js > web.log 2>&1 &
+
+      - name: Run the end-to-end suites
+        run: node tests/run.mjs --ready
+
+      - name: Show logs on failure
+        if: failure()
+        run: |
+          docker compose logs api --tail 200
+          cat web.log || true

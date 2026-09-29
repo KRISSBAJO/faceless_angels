@@ -117,6 +117,15 @@ const FOOTER_LINKS: [string, [string, string][]][] = [
       ["/transparency", "Where the money goes"],
     ],
   ],
+  [
+    "About",
+    [
+      ["/contact", "Contact"],
+      ["/privacy", "Privacy policy"],
+      ["/terms", "Terms of use"],
+      ["/giving-policy", "Giving and refunds"],
+    ],
+  ],
 ];
 
 export default function Home() {
@@ -464,7 +473,7 @@ export default function Home() {
       </main>
 
       <footer className="border-t border-line bg-surface">
-        <div className="mx-auto grid w-full max-w-6xl gap-10 px-5 py-12 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
+        <div className="mx-auto grid w-full max-w-6xl gap-10 px-5 py-12 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1fr]">
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-2.5">
               <Mark />

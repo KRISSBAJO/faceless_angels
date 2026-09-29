@@ -44,3 +44,6 @@ next-env.d.ts
 # Local-only Docker settings and certificates (see docker-compose.override.yml)
 docker-compose.override.yml
 /.certs/
+
+# Compiled copies made by the test runner
+/tests/.cache/

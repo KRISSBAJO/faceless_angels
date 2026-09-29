@@ -254,7 +254,9 @@ export default function DonateForm({ cancelled }: { cancelled: boolean }) {
         <p className="text-xs leading-5 text-muted">
           You will pay on {option ? PROVIDER_NAMES[option.provider] : "the payment company"}
           &apos;s secure page. Your card details never reach Faceless Angels.
-          {kind === "monthly" ? " You can stop a monthly gift at any time from My giving." : ""}
+          {kind === "monthly" ? " You can stop a monthly gift at any time from My giving." : ""}{" "}
+          By giving you agree to the{" "}
+          <Link href="/giving-policy" className="underline underline-offset-4">giving and refund policy</Link>.
         </p>
       </div>
     </form>

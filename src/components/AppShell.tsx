@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { api, errorMessage, type User } from "@/lib/api";
 import SiteHeader from "./SiteHeader";
@@ -79,6 +80,18 @@ export default function AppShell({
           Faceless Angels is not an emergency service. If you are in immediate
           danger, call 911.
         </p>
+        <nav
+          aria-label="Policies"
+          className={`mx-auto flex w-full flex-wrap gap-x-5 gap-y-1 px-5 pb-6 text-sm text-muted ${
+            wide ? "max-w-6xl" : "max-w-5xl"
+          }`}
+        >
+          <Link href="/contact" className="hover:text-ink">Contact</Link>
+          <Link href="/privacy" className="hover:text-ink">Privacy</Link>
+          <Link href="/terms" className="hover:text-ink">Terms</Link>
+          <Link href="/giving-policy" className="hover:text-ink">Giving and refunds</Link>
+          <Link href="/transparency" className="hover:text-ink">Where the money goes</Link>
+        </nav>
       </footer>
     </>
   );

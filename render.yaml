@@ -25,6 +25,9 @@ services:
       # (or https://faceless-web.onrender.com until the domain is set).
       - key: WEB_URL
         sync: false
+      # Shown on the Contact page and in the policies.
+      - key: CONTACT_EMAIL
+        sync: false
 
   # The API. Private: only the website can reach it.
   - type: pserv
