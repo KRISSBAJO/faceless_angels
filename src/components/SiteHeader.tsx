@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { api, type User } from "@/lib/api";
+import { api, errorMessage, type User } from "@/lib/api";
 import { REVIEW_ROLES } from "@/lib/session";
 import Mark from "./Mark";
 
@@ -30,12 +29,14 @@ function Menu({
   heading,
   links,
   onSignOut,
+  signingOut = false,
 }: {
   label: string;
   /** A line at the top of the open menu, such as who is signed in. */
   heading?: string;
   links: Links;
   onSignOut?: () => void;
+  signingOut?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
@@ -93,9 +94,10 @@ function Menu({
               <button
                 type="button"
                 onClick={onSignOut}
+                disabled={signingOut}
                 className="block w-full px-4 py-2 text-left hover:bg-paper"
               >
-                Sign out
+                {signingOut ? "Signing out…" : "Sign out"}
               </button>
             </li>
           ) : null}
@@ -117,8 +119,9 @@ export default function SiteHeader({
   /** Matches the wider home page. */
   wide?: boolean;
 }) {
-  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
+  const [signOutError, setSignOutError] = useState<string | null>(null);
   const header = useRef<HTMLElement>(null);
   const mobileButton = useRef<HTMLButtonElement>(null);
 
@@ -142,10 +145,19 @@ export default function SiteHeader({
   }, [mobileOpen]);
 
   async function signOut() {
+    if (signingOut) return;
     setMobileOpen(false);
-    await api("/auth/sign-out", { method: "POST" }).catch(() => undefined);
-    router.push("/");
-    router.refresh();
+    setSigningOut(true);
+    setSignOutError(null);
+    try {
+      await api("/auth/sign-out", { method: "POST" });
+      // Reload the document so pages using a loaded user cannot keep showing
+      // the previous signed-in state after the session cookie is cleared.
+      window.location.replace("/");
+    } catch (error) {
+      setSignOutError(`${errorMessage(error)} You are still signed in.`);
+      setSigningOut(false);
+    }
   }
 
   const ready = user && !user.mustChangePassword;
@@ -232,6 +244,7 @@ export default function SiteHeader({
                 heading={`Signed in as ${user.fullName}`}
                 links={own}
                 onSignOut={signOut}
+                signingOut={signingOut}
               />
             ) : (
               <>
@@ -250,6 +263,11 @@ export default function SiteHeader({
           </>
         ) : null}
       </div>
+      {signOutError ? (
+        <p role="alert" className="mx-auto w-full max-w-5xl px-5 pb-3 text-sm text-gold">
+          {signOutError}
+        </p>
+      ) : null}
       {showNav && mobileOpen ? (
         <nav
           id="mobile-site-menu"
@@ -301,7 +319,7 @@ export default function SiteHeader({
                       {label}
                     </Link>
                   ))}
-                  <button type="button" onClick={signOut} className="flex min-h-11 items-center pl-4 text-left text-sm text-muted">Sign out</button>
+                  <button type="button" onClick={signOut} disabled={signingOut} className="flex min-h-11 items-center pl-4 text-left text-sm text-muted">{signingOut ? "Signing out…" : "Sign out"}</button>
                 </div>
               </details>
             ) : (
