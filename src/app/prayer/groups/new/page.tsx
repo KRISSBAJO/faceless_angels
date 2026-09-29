@@ -42,26 +42,21 @@ export default function NewGroupPage() {
   if (!user) return <AppShell>{null}</AppShell>;
 
   return (
-    <AppShell user={user}>
-      <div className="flex max-w-2xl flex-col gap-3">
+    <AppShell user={user} verificationMessage="Confirm your email before you start a prayer group.">
+      <div className="max-w-3xl space-y-3">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">Prayer groups</p>
         <h1 className="font-serif text-4xl sm:text-5xl">Start a prayer group</h1>
-        <p className="leading-7 text-muted">
-          A moderator looks at each new group before it opens. We will email
-          you when yours is approved.
+        <p className="max-w-2xl leading-7 text-muted">
+          Bring people together to pray regularly. Tell us about the group, how it meets, and who can join. A moderator will review your request and email you when it is approved.
         </p>
       </div>
-      {user.emailVerified ? null : (
-        <p className="max-w-2xl rounded-lg border border-line bg-surface px-4 py-3 text-sm leading-6">
-          Confirm your email before you start a group. Use the link we sent
-          you, or the button at the top of the page.
-        </p>
-      )}
       {about ? (
         <GroupForm
           codeOfConduct={about.codeOfConduct}
           submitLabel="Send for approval"
           error={error}
           busy={busy || !user.emailVerified}
+          disabledReason={!user.emailVerified ? "Confirm your email with the link we sent before you can send this group for approval." : undefined}
           onSubmit={create}
         />
       ) : null}

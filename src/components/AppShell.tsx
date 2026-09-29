@@ -5,7 +5,7 @@ import { useState } from "react";
 import { api, errorMessage, type User } from "@/lib/api";
 import SiteHeader from "./SiteHeader";
 
-function VerifyEmailBanner({ user }: { user: User }) {
+function VerifyEmailBanner({ user, message }: { user: User; message?: string }) {
   const [state, setState] = useState<"idle" | "sent" | string>("idle");
 
   async function resend() {
@@ -25,7 +25,7 @@ function VerifyEmailBanner({ user }: { user: User }) {
             ? `We sent a new link to ${user.email}.`
             : state !== "idle"
               ? state
-              : `Confirm your email to submit a request or make a pledge. We sent a link to ${user.email}.`}
+              : `${message ?? "Confirm your email to submit a request or make a pledge."} We sent a link to ${user.email}.`}
         </p>
         {state === "idle" ? (
           <button
@@ -45,6 +45,7 @@ export default function AppShell({
   user,
   visitorNav = false,
   wide = false,
+  verificationMessage,
   children,
 }: {
   user?: User | null;
@@ -52,6 +53,7 @@ export default function AppShell({
   visitorNav?: boolean;
   /** Room for side columns, as on an article. */
   wide?: boolean;
+  verificationMessage?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -62,7 +64,7 @@ export default function AppShell({
         wide={wide}
       />
       {user && !user.emailVerified && !user.mustChangePassword ? (
-        <VerifyEmailBanner user={user} />
+        <VerifyEmailBanner user={user} message={verificationMessage} />
       ) : null}
       <main
         className={`mx-auto flex w-full flex-1 flex-col gap-8 px-5 py-12 ${
