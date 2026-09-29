@@ -246,10 +246,18 @@ async function paystack<T>(
   }
   const json = (await res.json().catch(() => null)) as {
     status?: boolean;
+    message?: string;
     data?: T;
   } | null;
   if (!res.ok || !json?.status) {
-    log.warn(`Paystack answered ${res.status} for ${method} ${path}`);
+    // Paystack's own reason. It never contains the key.
+    log.warn(
+      `Paystack answered ${res.status} for ${method} ${path}` +
+        (json?.message ? `: ${json.message.slice(0, 200)}` : ''),
+    );
+    if (/email/i.test(json?.message ?? '')) {
+      throw new ProviderError('Paystack did not accept that email address. Check it and try again.');
+    }
     throw new ProviderError('Paystack turned the request down. Try again, or give another way.');
   }
   // Some answers, like stopping a subscription, carry no data.
