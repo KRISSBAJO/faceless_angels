@@ -14,8 +14,8 @@ jobs:
     name: Types and lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -23,6 +23,8 @@ jobs:
             package-lock.json
             api/package-lock.json
       - run: npm ci
+      # Next.js writes its page types (PageProps and friends) on demand.
+      - run: npx next typegen
       - run: npx tsc --noEmit -p .
       - run: npx eslint src
       - run: npm ci
@@ -37,8 +39,8 @@ jobs:
     env:
       CI: "true"
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
