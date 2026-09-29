@@ -1,17 +1,19 @@
 import type { NextConfig } from "next";
 
+let output: "standalone" | undefined;
+if (!process.env.VERCEL) output = "standalone";
+
 const nextConfig: NextConfig = {
   // Docker needs a self-contained server; Vercel packages Next.js itself.
-  // Calls to /api are passed on by src/app/api/[...path]/route.ts locally.
-  ...(process.env.VERCEL === "1" ? {} : { output: "standalone" as const }),
+  output,
   // On Vercel, proxy /api at the routing layer. The Route Handler above runs
   // as a Function there and cannot accept this app's 8 MB documents or
   // 20 MB Word imports. The browser still uses same-origin /api URLs, so its
   // session cookie continues to work.
   async rewrites() {
-    if (process.env.VERCEL !== "1") return [];
+    if (!process.env.VERCEL) return [];
     const apiUrl = process.env.API_URL?.trim().replace(/\/$/, "");
-    if (!apiUrl || !apiUrl.startsWith("https://")) {
+    if (!apiUrl) {
       throw new Error("Set API_URL to the public HTTPS Render API URL on Vercel.");
     }
     return {
