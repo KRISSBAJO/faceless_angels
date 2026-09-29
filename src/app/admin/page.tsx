@@ -68,7 +68,7 @@ function ActionCard({
       </span>
     </>
   );
-  const className = "group flex min-h-44 flex-col justify-between rounded-2xl border border-line bg-surface p-5 transition-colors hover:border-gold-bright";
+  const className = "group flex min-h-32 flex-col justify-between rounded-2xl border border-line bg-surface p-4 transition-colors hover:border-gold-bright sm:min-h-44 sm:p-5";
   return href ? <Link href={href} className={className}>{content}</Link> : <div className={className}>{content}</div>;
 }
 
