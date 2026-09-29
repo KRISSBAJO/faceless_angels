@@ -1,0 +1,3 @@
+# The NestJS API is deployed separately on Render. Its root-level api/
+# directory would otherwise be treated as Vercel Functions.
+api
