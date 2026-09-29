@@ -29,6 +29,10 @@ services:
         value: us-east-1
       - key: AWS_S3_BUCKET
         sync: false
+      # Lets this testing API serve non-document features until S3 is set.
+      # Uploads return 503; private files never use Render's ephemeral disk.
+      - key: ALLOW_STORAGE_DISABLED_FOR_TEST
+        value: "true"
       - key: AWS_ACCESS_KEY_ID
         sync: false
       - key: AWS_SECRET_ACCESS_KEY

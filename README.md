@@ -72,8 +72,11 @@ the existing `render.yaml` is for hosting all three parts on Render.
    the database.
 2. In Render, create a Blueprint from this repository and select
    `render-vercel.yaml`. Set `DATABASE_URL` to that Renviq URL. Fill in the
-   other prompted values. In particular, production requires a separate S3
-   bucket and credentials for encrypted documents. Keep `GIVING_LIVE=false`
+   other prompted values. The test Blueprint sets
+   `ALLOW_STORAGE_DISABLED_FOR_TEST=true`: if S3 is not configured, the API
+   runs but document uploads and downloads return 503. Add a separate S3
+   bucket and credentials before testing documents, then remove that flag
+   before production. Keep `GIVING_LIVE=false`
    and use payment test keys. The Blueprint creates a public HTTPS API in
    Render's Ohio region, near Renviq's Chicago region. The Blueprint requests
    Render's free web service plan, which sleeps after 15 minutes idle and
@@ -97,7 +100,8 @@ and session cookies on the website's address. This also sends document and
 Word uploads directly through Vercel's proxy. The local and all-Render setups
 continue using the Next.js route handler. Vercel Functions have a 4.5 MB
 request limit, which is too small for this app's 8 MB documents and 20 MB Word
-imports.
+imports. `.vercelignore` excludes the root `api/` directory so Vercel builds
+only the website; Render builds the API separately.
 
 The Renviq database URL and all API secrets belong on Render only. Vercel
 needs only `API_URL`, `WEB_URL`, and `CONTACT_EMAIL` for this setup. Never put

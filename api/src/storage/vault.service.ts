@@ -3,7 +3,7 @@ import {
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, ServiceUnavailableException } from '@nestjs/common';
 import {
   createCipheriv,
   createDecipheriv,
@@ -62,6 +62,7 @@ export class VaultService implements OnModuleInit {
   private readonly log = new Logger(VaultService.name);
   private key: Buffer;
   private s3: S3Client | null = null;
+  private storageDisabled = false;
 
   onModuleInit() {
     const key = Buffer.from(config.storage.encryptionKey, 'base64');
@@ -76,6 +77,9 @@ export class VaultService implements OnModuleInit {
       // Credentials come from AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.
       this.s3 = new S3Client({ region: config.storage.region });
       this.log.log('Storing documents in S3.');
+    } else if (config.production && config.storage.disabledInTest) {
+      this.storageDisabled = true;
+      this.log.warn('Document storage is disabled in this test deployment.');
     } else if (config.production) {
       // A hosted container loses its disk on every deploy.
       throw new Error(
@@ -95,6 +99,9 @@ export class VaultService implements OnModuleInit {
     bytes: Buffer,
     options: { published?: boolean } = {},
   ): Promise<StoredFile> {
+    if (this.storageDisabled) {
+      throw new ServiceUnavailableException('Document storage is not configured.');
+    }
     const key = `${folder}/${randomUUID()}.bin`;
     const encryption = options.published ? null : SCHEME;
     const body = options.published ? bytes : this.seal(bytes);
@@ -117,6 +124,9 @@ export class VaultService implements OnModuleInit {
   }
 
   async get(file: StoredFile): Promise<Buffer> {
+    if (this.storageDisabled) {
+      throw new ServiceUnavailableException('Document storage is not configured.');
+    }
     const raw =
       file.storage === 's3'
         ? await this.fromS3(file.key)

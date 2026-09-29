@@ -56,6 +56,7 @@ export const config = {
   },
   storage: {
     bucket: env('AWS_S3_BUCKET'),
+    disabledInTest: env('ALLOW_STORAGE_DISABLED_FOR_TEST') === 'true',
     region: env('AWS_REGION') || 'us-east-1',
     localDir: env('EVIDENCE_DIR') || './data/evidence',
     encryptionKey: env('EVIDENCE_ENCRYPTION_KEY'),
